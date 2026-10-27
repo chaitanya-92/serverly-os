@@ -96,15 +96,10 @@ export async function PATCH(request: Request, { params }: Context) {
   if (data.document !== undefined) values.document = data.document;
   if (data.document !== undefined) values.revision = nextRevision;
 
-  let query = db.update(projects).set(values).where(
-    and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id)),
-  );
-  if (data.expectedRevision !== undefined) {
-    query = db.update(projects).set(values).where(
-      and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id), eq(projects.revision, data.expectedRevision)),
-    ) as typeof query;
-  }
-  const [updated] = await query.returning({
+  const updateWhere = data.expectedRevision === undefined
+    ? and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id))
+    : and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id), eq(projects.revision, data.expectedRevision));
+  const [updated] = await db.update(projects).set(values).where(updateWhere).returning({
     id: projects.id,
     name: projects.name,
     description: projects.description,
