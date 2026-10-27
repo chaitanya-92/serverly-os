@@ -1,0 +1,334 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
+  CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
+  MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
+  Volume2, X, Zap, Moon, Sun,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+
+type ChannelType = "text" | "voice";
+type Channel = { id: string; name: string; type: ChannelType; locked?: boolean };
+type Category = { id: string; name: string; channels: Channel[] };
+
+const starterCategories: Category[] = [
+  { id: "welcome", name: "START HERE", channels: [
+    { id: "start", name: "start-here", type: "text" },
+    { id: "rules", name: "rules", type: "text" },
+    { id: "announcements", name: "announcements", type: "text", locked: true },
+  ]},
+  { id: "community", name: "THE COMMUNITY", channels: [
+    { id: "general", name: "general", type: "text" },
+    { id: "introductions", name: "introductions", type: "text" },
+    { id: "showcase", name: "showcase", type: "text" },
+  ]},
+  { id: "dev", name: "BUILD TOGETHER", channels: [
+    { id: "help", name: "dev-help", type: "text" },
+    { id: "resources", name: "resources", type: "text" },
+    { id: "coding", name: "Coding lounge", type: "voice" },
+    { id: "pairing", name: "Pair programming", type: "voice" },
+  ]},
+  { id: "staff", name: "STAFF CORNER", channels: [
+    { id: "mod-chat", name: "mod-chat", type: "text", locked: true },
+  ]},
+];
+
+const presets = [
+  { id: "developer", name: "Developer Hub", description: "Build in public, share projects, help each other.", icon: Code2, members: "500+", color: "violet" },
+  { id: "gaming", name: "Gaming Community", description: "Squads, game nights, voice lobbies, and LFG.", icon: Gamepad2, members: "1k+", color: "blue" },
+  { id: "creator", name: "Creator Club", description: "A home for fans, updates, and creative feedback.", icon: Sparkles, members: "250+", color: "pink" },
+  { id: "study", name: "Study Group", description: "Study rooms, accountability, and shared resources.", icon: Crown, members: "100+", color: "amber" },
+];
+
+function Designer() {
+  const [selectedPreset, setSelectedPreset] = useState("developer");
+  const [categories, setCategories] = useState<Category[]>(starterCategories);
+  const [selectedChannel, setSelectedChannel] = useState("general");
+  const [serverName, setServerName] = useState("Devspace");
+  const [search, setSearch] = useState("");
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
+  const activePreset = presets.find((preset) => preset.id === selectedPreset) ?? presets[0];
+  const selected = useMemo(
+    () => categories.flatMap((category) => category.channels).find((channel) => channel.id === selectedChannel),
+    [categories, selectedChannel]
+  );
+
+  function choosePreset(id: string) {
+    setSelectedPreset(id);
+    const preset = presets.find((item) => item.id === id);
+    if (preset) setServerName(preset.name);
+    if (id === "gaming") {
+      setCategories([
+        { id: "welcome", name: "WELCOME", channels: [{ id: "start", name: "start-here", type: "text" }, { id: "rules", name: "server-rules", type: "text" }, { id: "announcements", name: "announcements", type: "text", locked: true }] },
+        { id: "hangout", name: "HANGOUT", channels: [{ id: "general", name: "general-chat", type: "text" }, { id: "clips", name: "clips-and-highlights", type: "text" }, { id: "looking", name: "looking-for-group", type: "text" }] },
+        { id: "voice", name: "VOICE LOBBIES", channels: [{ id: "squad", name: "Squad One", type: "voice" }, { id: "squad-two", name: "Squad Two", type: "voice" }, { id: "afk", name: "AFK", type: "voice" }] },
+        { id: "staff", name: "MODERATION", channels: [{ id: "mod-chat", name: "mod-chat", type: "text", locked: true }] },
+      ]);
+    } else if (id === "creator") {
+      setCategories([
+        { id: "welcome", name: "GET STARTED", channels: [{ id: "start", name: "welcome", type: "text" }, { id: "rules", name: "community-guidelines", type: "text" }, { id: "announcements", name: "creator-updates", type: "text", locked: true }] },
+        { id: "community", name: "COMMUNITY", channels: [{ id: "general", name: "chat", type: "text" }, { id: "introductions", name: "introduce-yourself", type: "text" }, { id: "showcase", name: "share-your-work", type: "text" }] },
+        { id: "studio", name: "THE STUDIO", channels: [{ id: "feedback", name: "feedback", type: "text" }, { id: "ideas", name: "ideas", type: "text" }, { id: "hangout", name: "Studio hangout", type: "voice" }] },
+      ]);
+    } else if (id === "study") {
+      setCategories([
+        { id: "welcome", name: "START HERE", channels: [{ id: "start", name: "welcome", type: "text" }, { id: "rules", name: "study-rules", type: "text" }, { id: "resources", name: "resources", type: "text" }] },
+        { id: "study", name: "STUDY FLOOR", channels: [{ id: "general", name: "study-chat", type: "text" }, { id: "questions", name: "ask-for-help", type: "text" }, { id: "progress", name: "daily-progress", type: "text" }] },
+        { id: "rooms", name: "FOCUS ROOMS", channels: [{ id: "focus", name: "Pomodoro room", type: "voice" }, { id: "silent", name: "Silent study", type: "voice" }] },
+      ]);
+    } else {
+      setCategories(starterCategories);
+    }
+    setSelectedChannel("general");
+    setNotice(preset ? `${preset.name} template loaded` : "Template loaded");
+  }
+
+  function addChannel(type: ChannelType) {
+    const id = `${type}-${Date.now()}`;
+    setCategories((current) => {
+      const next = [...current];
+      if (next.length === 0) next.push({ id: "new-category", name: "NEW CATEGORY", channels: [] });
+      next[0] = { ...next[0], channels: [...next[0].channels, { id, name: type === "text" ? "new-channel" : "New voice room", type }] };
+      return next;
+    });
+    setSelectedChannel(id);
+    setShowCreateMenu(false);
+    setNotice(type === "text" ? "Text channel added" : "Voice channel added");
+  }
+
+  function renameSelected(name: string) {
+    setCategories((current) => current.map((category) => ({
+      ...category,
+      channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, name } : channel),
+    })));
+  }
+
+  function removeSelected() {
+    if (!selected) return;
+    setCategories((current) => current.map((category) => ({
+      ...category,
+      channels: category.channels.filter((channel) => channel.id !== selectedChannel),
+    })));
+    setSelectedChannel("");
+    setNotice("Channel removed from blueprint");
+  }
+
+  const channelCount = categories.reduce((count, category) => count + category.channels.length, 0);
+  const voiceCount = categories.reduce((count, category) => count + category.channels.filter((channel) => channel.type === "voice").length, 0);
+
+  return (
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_28px_var(--brand-glow)]"><LayoutGrid className="size-5" /></div>
+          <div className="leading-tight"><div className="text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></div><div className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</div></div>
+          <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
+          <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">Untitled server</span></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
+          <Button variant="outline" size="icon" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}><span className="sr-only">Toggle theme</span>{theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}</Button>
+          <Button variant="outline" className="hidden sm:inline-flex" onClick={() => { setNotice("Blueprint saved locally for this preview"); }}><Check className="size-4" /> Save draft</Button>
+          <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
+        </div>
+      </header>
+
+      <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 p-4 md:p-6 xl:grid-cols-[250px_minmax(0,1fr)_292px] xl:gap-6 xl:p-8">
+        <aside className="space-y-5">
+          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
+          <nav className="space-y-1">
+            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg bg-accent px-3 py-2.5 text-left text-sm font-medium text-accent-foreground"><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
+            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"><Sparkles className="size-4" /> AI architect</Button>
+            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"><LayoutGrid className="size-4" /> Template library</Button>
+          </nav>
+          <Separator />
+          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Templates</div><span className="text-xs text-muted-foreground">04</span></div>
+          <div className="space-y-2">
+            {presets.map((preset) => {
+              const Icon = preset.icon;
+              const isActive = selectedPreset === preset.id;
+              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] shadow-[0_0_0_1px_var(--brand-glow)]" : "border-transparent hover:border-border hover:bg-card"}`}>
+                <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
+                <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div><div className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{preset.description}</div></div>
+                {isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}
+              </Button>;
+            })}
+          </div>
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/[0.12] to-transparent">
+            <CardContent className="p-4">
+              <div className="mb-2 flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><WandSparkles className="size-4" /></div>
+              <div className="text-sm font-semibold">Have an idea?</div>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let AI draft the perfect structure.</p>
+              <Button variant="outline" size="sm" className="mt-3 w-full border-primary/25 bg-background/40" onClick={() => setNotice("AI architect is planned for the next build phase.")}>Try AI architect <ArrowRight className="size-3.5" /></Button>
+            </CardContent>
+          </Card>
+        </aside>
+
+        <section className="min-w-0 space-y-5">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">Last edited just now</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
+            <div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {[{ label: "Categories", value: categories.length.toString(), icon: LayoutGrid }, { label: "Channels", value: channelCount.toString(), icon: Hash }, { label: "Voice rooms", value: voiceCount.toString(), icon: AudioLines }].map((metric) => {
+              const Icon = metric.icon;
+              return <Card key={metric.label} className="border-border bg-card"><CardContent className="flex items-center gap-3 p-3.5 sm:p-4"><div className="hidden size-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground sm:flex"><Icon className="size-4" /></div><div><div className="text-xl font-semibold tracking-tight">{metric.value}</div><div className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">{metric.label}</div></div></CardContent></Card>;
+            })}
+          </div>
+
+          {showCreateMenu && <Card className="border-primary/30"><CardContent className="flex flex-wrap items-center justify-between gap-3 p-3"><div><div className="text-sm font-medium">Add a channel</div><div className="text-xs text-muted-foreground">Choose the channel type to add to the first category.</div></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => addChannel("text")}><Hash className="size-4" /> Text channel</Button><Button variant="outline" size="sm" onClick={() => addChannel("voice")}><Volume2 className="size-4" /> Voice channel</Button><Button variant="ghost" size="icon" onClick={() => setShowCreateMenu(false)} aria-label="Close"><X className="size-4" /></Button></div></CardContent></Card>}
+
+          <Card className="overflow-hidden border-border/80">
+            <div className="flex flex-col justify-between gap-3 border-b border-border bg-card/70 p-4 sm:flex-row sm:items-center sm:px-5">
+              <div><div className="flex items-center gap-2 text-sm font-semibold"><span className="size-2 rounded-full bg-emerald-400" /> Live preview</div><div className="mt-1 text-xs text-muted-foreground">A preview of your Discord server structure</div></div>
+              <div className="flex items-center gap-2"><div className="relative"><Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a channel..." className="h-8 w-full pl-8 text-xs sm:w-44" /></div><Button variant="outline" size="icon" className="size-8" aria-label="More preview options" onClick={() => setNotice("Preview options: drag-and-drop ordering is coming next.")}><MoreHorizontal className="size-4" /></Button></div>
+            </div>
+            <div className="grid min-h-[540px] grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
+              <div className="border-b border-border bg-[var(--discord-sidebar)] p-3 md:border-b-0 md:border-r">
+                <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#8d6b45] text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
+                <Separator className="mb-3" />
+                <div className="space-y-4">
+                  {categories.map((category) => {
+                    const visibleChannels = category.channels.filter((channel) => channel.name.toLowerCase().includes(search.toLowerCase()));
+                    if (search && visibleChannels.length === 0) return null;
+                    return <div key={category.id}>
+                      <div className="group mb-1 flex items-center justify-between px-1.5 text-[10px] font-bold tracking-[0.13em] text-[var(--discord-muted)]"><span className="flex items-center gap-1"><ChevronDown className="size-3" />{category.name}</span><Button variant="ghost" className="opacity-0 transition group-hover:opacity-100" onClick={() => { const newName = prompt("Rename category", category.name); if (newName?.trim()) setCategories((current) => current.map((item) => item.id === category.id ? { ...item, name: newName.trim().toUpperCase() } : item)); }} aria-label={`Rename ${category.name}`}><MoreHorizontal className="size-3.5" /></Button></div>
+                      <div className="space-y-0.5">
+                        {visibleChannels.map((channel) => {
+                          const active = selectedChannel === channel.id;
+                          return <Button variant="ghost" key={channel.id} onClick={() => setSelectedChannel(channel.id)} className={`group flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-left text-[13px] transition ${active ? "bg-[var(--discord-active)] text-[var(--discord-text)]" : "text-[var(--discord-muted)] hover:bg-[var(--discord-hover)] hover:text-[var(--discord-text)]"}`}>
+                            {channel.type === "text" ? <Hash className={`size-[17px] shrink-0 ${active ? "text-primary" : "text-[var(--discord-muted)]"}`} /> : <Volume2 className={`size-[16px] shrink-0 ${active ? "text-[#b8b2ff]" : "text-[#74788a]"}`} />}
+                            <span className="min-w-0 flex-1 truncate">{channel.name}</span>{channel.locked && <LockKeyhole className="size-3 shrink-0 text-[#74788a]" />}{active && <span className="size-1.5 rounded-full bg-primary" />}
+                          </Button>;
+                        })}
+                      </div>
+                    </div>;
+                  })}
+                  <Button variant="ghost" onClick={() => { const name = prompt("New category name", "NEW CATEGORY"); if (name?.trim()) setCategories((current) => [...current, { id: `category-${Date.now()}`, name: name.trim().toUpperCase(), channels: [] }]); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
+                </div>
+                <div className="mt-6 rounded-lg border border-dashed border-border p-3"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-700 dark:text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
+              </div>
+              <div className="flex min-w-0 flex-col bg-[var(--discord-main)]">
+                <div className="flex items-center gap-3 border-b border-border/80 px-4 py-3"><Hash className="size-4 text-primary" /><span className="text-sm font-semibold">{selected?.name ?? "Select a channel"}</span><Separator orientation="vertical" className="h-4" /><span className="truncate text-xs text-muted-foreground">{selected?.type === "voice" ? "Voice channel" : "Text channel"}</span><div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Notifications" onClick={() => setNotice("Channel notification settings will be available in a future iteration.")}><Bell className="size-4" /></Button><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Channel options" onClick={() => setNotice("Select a channel and edit its details in the inspector.")}><MoreHorizontal className="size-4" /></Button></div></div>
+                <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
+                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/[0.09] text-primary shadow-[0_0_45px_var(--brand-glow)]">{selected?.type === "voice" ? <Volume2 className="size-7" /> : <Hash className="size-7" />}</div>
+                  <Badge variant="outline" className="mb-3 border-border/80 text-muted-foreground">{selected?.type === "voice" ? "VOICE ROOM" : "TEXT CHANNEL"}</Badge>
+                  <h2 className="text-xl font-semibold tracking-tight">{selected?.name ?? "Choose a channel"}</h2>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{selected?.type === "voice" ? "A place for members to talk, collaborate, or hang out together." : "This is where your community conversation will happen. Add a topic to tell members what belongs here."}</p>
+                  {selected?.locked && <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-3 py-1.5 text-xs text-amber-700 dark:text-amber-700 dark:text-amber-200"><LockKeyhole className="size-3.5" /> Restricted channel</div>}
+                  <div className="mt-8 flex flex-wrap justify-center gap-2"><Button variant="outline" size="sm" onClick={() => { setActiveTab("structure"); document.getElementById("inspector")?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }}><Settings2 className="size-3.5" /> Edit settings</Button><Button variant="ghost" size="sm" onClick={() => setNotice("Preview is illustrative; Discord publishing is not connected yet.")}><MessageCircle className="size-3.5" /> Preview details</Button></div>
+                </div>
+                <div className="border-t border-border/80 p-3"><div className="flex items-center gap-2 rounded-lg border border-[var(--discord-border)] bg-[var(--discord-message)] px-3 py-2.5 text-xs text-muted-foreground"><MessageCircle className="size-4" /><span>Messages will appear here once your server is live</span><span className="ml-auto text-[10px]">PREVIEW</span></div></div>
+              </div>
+            </div>
+          </Card>
+          {notice && <div role="status" className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.07] px-4 py-3 text-sm text-primary"><span className="flex items-center gap-2"><Check className="size-4 shrink-0" />{notice}</span><Button variant="ghost" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-4" /></Button></div>}
+        </section>
+
+        <aside id="inspector" className="space-y-4">
+          <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-2 text-lg font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Tune your server identity and selected channel.</p></div>
+          <Card>
+            <CardContent className="space-y-4 p-4">
+              <div><label htmlFor="server-name" className="mb-2 block text-xs font-medium text-muted-foreground">Server name</label><Input id="server-name" value={serverName} onChange={(event) => setServerName(event.target.value)} className="h-9" /></div>
+              <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Server category</label><div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-sm"><activePreset.icon className="size-4 text-primary" />{activePreset.name}<ChevronDown className="ml-auto size-4 text-muted-foreground" /></div></div>
+              <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Visibility</label><div className="grid grid-cols-2 gap-2"><Button variant="ghost" onClick={() => setNotice("Public visibility selected for this blueprint.")} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] px-2 py-2.5 text-xs font-medium"><MessageCircle className="size-3.5 text-primary" /> Public</Button><Button variant="ghost" onClick={() => setNotice("Private visibility selected for this blueprint.")} className="flex items-center justify-center gap-2 rounded-lg border border-border px-2 py-2.5 text-xs text-muted-foreground hover:bg-secondary"><LockKeyhole className="size-3.5" /> Private</Button></div></div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <div className="flex border-b border-border px-2 pt-2"><Button variant="ghost" onClick={() => setActiveTab("structure")} className={`flex-1 border-b-2 px-3 py-2.5 text-xs font-medium transition ${activeTab === "structure" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Channel</Button><Button variant="ghost" onClick={() => setActiveTab("roles")} className={`flex-1 border-b-2 px-3 py-2.5 text-xs font-medium transition ${activeTab === "roles" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Roles & access</Button></div>
+            <CardContent className="space-y-4 p-4">
+              {activeTab === "structure" ? <>
+                <div><label htmlFor="channel-name" className="mb-2 block text-xs font-medium text-muted-foreground">Channel name</label><Input id="channel-name" value={selected?.name ?? ""} disabled={!selected} onChange={(event) => renameSelected(event.target.value)} placeholder="Select a channel" className="h-9" /></div>
+                <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Channel type</label><div className="grid grid-cols-2 gap-2"><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, type: "text" } : channel) })))} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs transition disabled:opacity-40 ${selected?.type === "text" ? "border-primary/40 bg-primary/[0.08] text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><Hash className="size-3.5" /> Text</Button><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, type: "voice" } : channel) })))} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs transition disabled:opacity-40 ${selected?.type === "voice" ? "border-primary/40 bg-primary/[0.08] text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><Volume2 className="size-3.5" /> Voice</Button></div></div>
+                <Separator />
+                <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-medium">Private channel</div><div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Limit visibility to selected roles.</div></div><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, locked: !channel.locked } : channel) })))} className={`relative mt-0.5 h-5 w-9 rounded-full transition disabled:opacity-40 ${selected?.locked ? "bg-primary" : "bg-secondary"}`} aria-label="Toggle private channel"><span className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${selected?.locked ? "left-[18px]" : "left-0.5"}`} /></Button></div>
+                <Button variant="destructive" className="w-full" disabled={!selected} onClick={removeSelected}><X className="size-4" /> Remove channel</Button>
+              </> : <>
+                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-amber-400/10 text-amber-700 dark:text-amber-300"><Crown className="size-4" /></div><div><div className="text-sm font-medium">Owner</div><div className="text-[11px] text-muted-foreground">Full server access</div></div><Badge variant="outline" className="ml-auto">1</Badge></div></div>
+                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="size-4" /></div><div><div className="text-sm font-medium">Moderator</div><div className="text-[11px] text-muted-foreground">Manage community</div></div><Badge variant="outline" className="ml-auto">3</Badge></div></div>
+                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-emerald-400/10 text-emerald-700 dark:text-emerald-300"><MessageCircle className="size-4" /></div><div><div className="text-sm font-medium">Member</div><div className="text-[11px] text-muted-foreground">Standard access</div></div><Badge variant="outline" className="ml-auto">∞</Badge></div></div>
+                <Button variant="outline" className="w-full" onClick={() => setNotice("Role editor is planned next. These are illustrative roles only.")}><Plus className="size-4" /> Add role</Button>
+              </>}
+            </CardContent>
+          </Card>
+          <Card className="border-border/80 bg-card/60">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-sm font-medium"><ShieldCheck className="size-4 text-emerald-400" /> Pre-deployment checks</div>
+              <div className="mt-3 space-y-2.5 text-xs"><div className="flex items-center gap-2 text-muted-foreground"><Check className="size-3.5 text-emerald-400" /> Channel structure <span className="ml-auto text-emerald-300">Ready</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Permissions audit <span className="ml-auto text-amber-200">Pending</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Discord connection <span className="ml-auto text-amber-200">Not linked</span></div></div>
+            </CardContent>
+          </Card>
+          <div className="flex items-center justify-center gap-2 py-1 text-[10px] text-muted-foreground"><Command className="size-3" /> Built for communities, by Serverly OS</div>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
+function ProductMark({ size = "size-10" }: { size?: string }) {
+  return <div className={`flex ${size} items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_36px_var(--brand-glow)]`}><LayoutGrid className="size-5" /></div>;
+}
+
+function LandingPage({ onStart }: { onStart: () => void }) {
+  return (
+    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+          <a href="#" className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_32px_var(--brand-glow)]"><LayoutGrid className="size-5"/></span><span className="text-[17px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></span></a>
+          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex"><a href="#features" className="hover:text-foreground">Features</a><a href="#workflow" className="hover:text-foreground">How it works</a><a href="#templates" className="hover:text-foreground">Templates</a></nav>
+          <Button onClick={onStart} className="rounded-xl px-4">Open studio <ArrowRight className="size-4"/></Button>
+        </div>
+      </header>
+      <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[.92fr_1.08fr] lg:gap-12 lg:pb-28 lg:pt-28">
+        <div className="landing-glow pointer-events-none absolute -left-48 top-0 h-[540px] w-[540px] rounded-full blur-3xl"/>
+        <motion.div initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{duration:.6,ease:"easeOut"}} className="relative z-10">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3.5 py-1.5 text-xs font-medium text-primary"><Sparkles className="size-3.5"/> The visual workspace for Discord communities <ArrowRight className="size-3.5"/></div>
+          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] sm:text-6xl lg:text-[68px]">Build your corner of the internet<span className="text-primary">.</span></h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">Design a Discord server that feels like home. Shape channels, organize roles, and see your community take form before you launch.</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button size="lg" onClick={onStart} className="h-12 rounded-xl px-5">Design your server <ArrowRight className="size-4"/></Button><Button size="lg" variant="outline" onClick={()=>document.getElementById("features")?.scrollIntoView({behavior:"smooth"})} className="h-12 rounded-xl px-5">Explore features <ChevronDown className="size-4"/></Button></div>
+          <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground"><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> Visual-first builder</span><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> Starter templates</span><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> No code required</span></div>
+        </motion.div>
+        <motion.div initial={{opacity:0,y:24,scale:.98}} animate={{opacity:1,y:0,scale:1}} transition={{duration:.75,delay:.12,ease:"easeOut"}} className="relative min-w-0">
+          <div className="absolute -inset-5 rounded-[30px] bg-primary/[0.07] blur-2xl"/>
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/20">
+            <div className="flex h-12 items-center justify-between border-b border-border px-4"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#ed6a5e]"/><span className="size-2 rounded-full bg-[#e8b44f]"/><span className="size-2 rounded-full bg-[#57bd82]"/><span className="ml-3 text-xs text-muted-foreground">Serverly Studio</span></div><Badge variant="subtle">Live preview</Badge></div>
+            <div className="grid min-h-[370px] grid-cols-[48px_138px_minmax(0,1fr)] sm:grid-cols-[54px_175px_minmax(0,1fr)]">
+              <div className="flex flex-col items-center gap-3 border-r border-border bg-background p-2.5"><div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-4"/></div><div className="my-1 h-px w-6 bg-border"/><div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><Code2 className="size-4"/></div><div className="flex size-9 items-center justify-center rounded-xl bg-secondary text-muted-foreground"><Gamepad2 className="size-4"/></div><div className="flex size-9 items-center justify-center rounded-xl bg-secondary text-muted-foreground"><Sparkles className="size-4"/></div><div className="mt-auto flex size-9 items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground"><Plus className="size-4"/></div></div>
+              <div className="border-r border-border bg-[var(--discord-sidebar)] p-3"><div className="mb-5 flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Code2 className="size-4"/></div><div><div className="text-xs font-semibold">Devspace</div><div className="text-[10px] text-muted-foreground">Community server</div></div></div><div className="mb-2 text-[9px] font-bold tracking-[.12em] text-muted-foreground">GET STARTED</div>{["welcome","rules","announcements"].map(x=><div key={x} className="mb-1 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] text-muted-foreground"><Hash className="size-3"/>{x}</div>)}<div className="mb-2 mt-5 text-[9px] font-bold tracking-[.12em] text-muted-foreground">COMMUNITY</div>{["general","introductions","showcase"].map((x,i)=><div key={x} className={i===0?"mb-1 flex items-center gap-1.5 rounded-md bg-[var(--discord-active)] px-2 py-1.5 text-[10px] text-foreground":"mb-1 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] text-muted-foreground"}><Hash className="size-3"/>{x}</div>)}</div>
+              <div className="flex min-w-0 flex-col bg-[var(--discord-main)]"><div className="flex h-12 items-center gap-2 border-b border-border px-3"><Hash className="size-4 text-primary"/><span className="text-xs font-semibold">general</span><div className="ml-auto flex gap-2 text-muted-foreground"><Search className="size-3.5"/><Bell className="size-3.5"/></div></div><div className="flex flex-1 flex-col justify-end gap-4 p-4 sm:p-5"><div className="rounded-xl border border-border bg-card p-3"><div className="mb-2 flex items-center gap-2"><div className="flex size-6 items-center justify-center rounded-lg bg-primary/15 text-primary"><Sparkles className="size-3.5"/></div><span className="text-[11px] font-semibold">Serverly Guide</span><Badge variant="subtle">BOT</Badge></div><p className="text-[11px] leading-5 text-muted-foreground">Your server is taking shape. Add channels, organize roles, and make this space your own.</p></div><div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-[11px] text-muted-foreground"><MessageCircle className="size-3.5"/> Message #general <Plus className="ml-auto size-3.5"/></div></div></div>
+            </div>
+            <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3"><div className="flex items-center gap-2 text-[11px] text-muted-foreground"><ShieldCheck className="size-3.5 text-emerald-400"/> Structure looks healthy</div><div className="flex items-center gap-1 text-[11px] text-primary"><Sparkles className="size-3.5"/> AI-ready workflow</div></div>
+          </div>
+          <motion.div animate={{y:[0,-5,0]}} transition={{duration:5,repeat:Infinity,ease:"easeInOut"}} className="absolute -right-3 top-16 hidden rounded-xl border border-border bg-card/95 p-3 shadow-xl backdrop-blur sm:block"><div className="flex items-center gap-2 text-xs font-medium"><span className="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><Check className="size-3.5"/></span> Roles organized</div><div className="mt-1 pl-9 text-[10px] text-muted-foreground">3 access levels</div></motion.div>
+        </motion.div>
+      </section>
+      <section id="features" className="border-y border-border/70 bg-card/40"><div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:grid-cols-3 sm:px-8">{[{icon:LayoutGrid,title:"Structure visually",desc:"Build a clean channel tree without getting lost in settings."},{icon:WandSparkles,title:"Start with a blueprint",desc:"Use community templates as a starting point, then make them yours."},{icon:ShieldCheck,title:"Plan access clearly",desc:"Keep channels and role ideas organized before you go live."}].map((item,i)=><motion.div key={item.title} initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.4}} transition={{delay:i*.08,duration:.45}} className="flex gap-4"><div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.08] text-primary"><item.icon className="size-5"/></div><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{item.desc}</p></div></motion.div>)}</div></section>
+      <section id="workflow" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24"><div className="mx-auto max-w-2xl text-center"><Badge variant="subtle">A calmer way to build</Badge><h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">From blank canvas to community-ready.</h2><p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">See the structure, adjust the details, and iterate before you invite the first member.</p></div><div className="mt-12 grid gap-4 md:grid-cols-3">{[{n:"01",title:"Choose your starting point",desc:"Pick a template or start with a blank structure."},{n:"02",title:"Shape the experience",desc:"Add channels, organize categories, and tune access ideas."},{n:"03",title:"Review your blueprint",desc:"Check the layout before planning your launch."}].map((step,i)=><motion.div key={step.n} initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.3}} transition={{delay:i*.1,duration:.45}} className="rounded-2xl border border-border bg-card/70 p-6"><div className="text-xs font-semibold tracking-[.15em] text-primary">{step.n} / WORKFLOW</div><h3 className="mt-5 text-lg font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.desc}</p></motion.div>)}</div></section>
+      <section id="templates" className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:pb-24"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><div className="text-xs font-semibold uppercase tracking-[.16em] text-primary">Starter templates</div><h2 className="mt-3 text-3xl font-semibold tracking-tight">A strong foundation, already mapped.</h2></div><Button variant="outline" onClick={onStart}>Browse templates <ArrowRight className="size-4"/></Button></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{presets.map((preset,i)=>{const Icon=preset.icon;return <motion.button type="button" key={preset.id} whileHover={{y:-4}} whileTap={{scale:.99}} onClick={onStart} className="rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/40 hover:bg-accent/30"><div className="flex size-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.08] text-primary"><Icon className="size-5"/></div><h3 className="mt-5 text-sm font-semibold">{preset.name}</h3><p className="mt-2 min-h-[60px] text-xs leading-5 text-muted-foreground">{preset.description}</p><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>Template 0{i+1}</span><ArrowRight className="size-3.5"/></div></motion.button>})}</div></section>
+      <section className="px-5 pb-20 sm:px-8"><div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-primary/20 bg-card px-6 py-12 text-center sm:px-12 sm:py-16"><div className="landing-glow pointer-events-none absolute inset-0 opacity-50"/><div className="relative"><div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-6"/></div><h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">Your community starts with a better blueprint.</h2><p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">A workspace designed to make server planning clear, visual, and enjoyable.</p><Button size="lg" onClick={onStart} className="mt-7 h-12 rounded-xl px-5">Open Serverly Studio <ArrowRight className="size-4"/></Button></div></div></section>
+      <footer className="border-t border-border/70 px-5 py-7 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-muted-foreground sm:flex-row"><span className="font-medium text-foreground">serverly OS</span><span>Designed for the communities you want to create.</span><span>Visual prototype · Discord connection coming later</span></div></footer>
+    </main>
+  );
+}
+
+export default function Home() {
+  const [showDesigner, setShowDesigner] = useState(false);
+  if (showDesigner) return <><div className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-2.5"><Button variant="ghost" size="sm" onClick={() => setShowDesigner(false)}><ArrowLeft className="size-4"/> Back to home</Button><span className="text-xs text-muted-foreground">Serverly Studio · Preview only</span><span className="w-[100px]"/></div><Designer/></>;
+  return <LandingPage onStart={() => setShowDesigner(true)} />;
+}

@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Serverly OS — Obsidian Luxe design tokens.
+   Light is the default; .dark switches every semantic surface. */
+:root {
+  color-scheme: light;
+  --background: #0b0a10;
+  --foreground: #f4f2fa;
+  --card: #111019;
+  --card-foreground: #f4f2fa;
+  --popover: #111019;
+  --popover-foreground: #f4f2fa;
+  --primary: #8b7cff;
+  --primary-foreground: #ffffff;
+  --secondary: #1b1926;
+  --secondary-foreground: #e9e6f3;
+  --muted: #1b1926;
+  --muted-foreground: #9995ad;
+  --accent: #29233e;
+  --accent-foreground: #eee9ff;
+  --destructive: #ef6464;
+  --border: #292637;
+  --input: #292637;
+  --ring: #8b7cff;
+  --radius: 0.75rem;
+  --app-header: rgb(11 10 16 / 92%);
+  --discord-sidebar: #14121d;
+  --discord-main: #111019;
+  --discord-active: #2b2540;
+  --discord-hover: #211d30;
+  --discord-text: #f4f2fa;
+  --discord-muted: #9995ad;
+  --discord-border: #292637;
+  --discord-message: #14121d;
+  --brand-glow: rgb(139 124 255 / 14%);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0b0a10;
+  --foreground: #f2eee8;
+  --card: #111019;
+  --card-foreground: #f2eee8;
+  --popover: #191724;
+  --popover-foreground: #f2eee8;
+  --primary: #c49a6c;
+  --primary-foreground: #17130f;
+  --secondary: #1b1926;
+  --secondary-foreground: #e9e6f3;
+  --muted: #1a1823;
+  --muted-foreground: #a49a8d;
+  --accent: #29233e;
+  --accent-foreground: #eee9ff;
+  --destructive: #ef6464;
+  --border: #292637;
+  --input: #292637;
+  --ring: #c49a6c;
+  --app-header: rgb(11 10 16 / 92%);
+  --discord-sidebar: #0e0d13;
+  --discord-main: #111019;
+  --discord-active: #2b2540;
+  --discord-hover: #1b1926;
+  --discord-text: #eee8df;
+  --discord-muted: #9995ad;
+  --discord-border: #332e27;
+  --discord-message: #0e0d13;
+  --brand-glow: rgb(139 124 255 / 16%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+::selection { background: var(--brand-glow); }
+button, input { font: inherit; }
+
+.landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
+.landing-shell { isolation: isolate; }
+.landing-nav { box-shadow: 0 1px 0 rgb(255 255 255 / 1%); }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+.landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
