@@ -403,12 +403,6 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </>}
             </CardContent>
           </Card>
-          <Card className="border-border/80 bg-card/60">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-4 text-emerald-400" /> Pre-deployment checks</div>
-              <div className="mt-3 space-y-2.5 text-xs"><div className="flex items-center gap-2 text-muted-foreground"><Check className="size-3.5 text-emerald-400" /> Channel structure <span className="ml-auto text-emerald-300">Ready</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Permissions audit <span className="ml-auto text-amber-200">Pending</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Discord connection <span className="ml-auto text-amber-200">Not linked</span></div></div>
-            </CardContent>
-          </Card>
           
         </aside>
       </div>
