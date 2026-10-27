@@ -74,6 +74,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   useEffect(() => { if (!notice) return; const timeout = window.setTimeout(() => setNotice(""), 3000); return () => window.clearTimeout(timeout); }, [notice]);
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
   const [isRestored, setIsRestored] = useState(false);
+  const [hasSavedBlueprint, setHasSavedBlueprint] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [showArchitectPromo, setShowArchitectPromo] = useState(false);
@@ -81,11 +82,19 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("serverly-os:blueprint:v1");
+      const savedUi = window.localStorage.getItem("serverly-os:ui:v1");
+      if (savedUi) {
+        const ui = JSON.parse(savedUi) as { workspaceTab?: string; sidebarCollapsed?: boolean; activeTab?: string };
+        if (ui.workspaceTab === "designer" || ui.workspaceTab === "ai" || ui.workspaceTab === "templates") setWorkspaceTab(ui.workspaceTab);
+        if (typeof ui.sidebarCollapsed === "boolean") setSidebarCollapsed(ui.sidebarCollapsed);
+        if (ui.activeTab === "structure" || ui.activeTab === "roles") setActiveTab(ui.activeTab);
+      }
       if (raw) {
+        setHasSavedBlueprint(true);
         const saved = JSON.parse(raw) as { serverName?: string; selectedPreset?: string; selectedChannel?: string; categories?: Category[]; savedAt?: string; visibility?: "public" | "private"; roles?: ServerRole[] };
         if (typeof saved.serverName === "string") setServerName(saved.serverName);
         if (typeof saved.selectedPreset === "string" && presets.some((preset) => preset.id === saved.selectedPreset)) setSelectedPreset(saved.selectedPreset);
-        if (Array.isArray(saved.categories)) setCategories(saved.categories);
+        if (Array.isArray(saved.categories) && saved.categories.every((category) => category && typeof category.id === "string" && typeof category.name === "string" && Array.isArray(category.channels) && category.channels.every((channel: Channel) => channel && typeof channel.id === "string" && typeof channel.name === "string" && (channel.type === "text" || channel.type === "voice")))) setCategories(saved.categories);
         if (typeof saved.selectedChannel === "string") setSelectedChannel(saved.selectedChannel);
         if (typeof saved.savedAt === "string") setLastSavedAt(saved.savedAt);
         if (saved.visibility === "public" || saved.visibility === "private") setVisibility(saved.visibility);
@@ -121,9 +130,24 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
       } catch {
         setNotice("Auto-save unavailable. Use Export JSON to keep a backup.");
       }
-    }, 650);
+    }, 250);
     return () => window.clearTimeout(timer);
   }, [isRestored, serverName, selectedPreset, selectedChannel, categories, visibility, roles]);
+
+  useEffect(() => {
+    if (!isRestored) return;
+    try {
+      window.localStorage.setItem("serverly-os:ui:v1", JSON.stringify({ workspaceTab, sidebarCollapsed, activeTab }));
+    } catch {
+      // UI preferences are optional; keep editing available if storage is blocked.
+    }
+  }, [isRestored, workspaceTab, sidebarCollapsed, activeTab]);
+
+  useEffect(() => {
+    if (!isRestored) return;
+    const allIds = categories.flatMap((category) => category.channels.map((channel) => channel.id));
+    if (selectedChannel && !allIds.includes(selectedChannel)) setSelectedChannel(allIds[0] ?? "");
+  }, [isRestored, categories, selectedChannel]);
 
   function saveDraft() {
     const savedAt = new Date().toISOString();
@@ -233,8 +257,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   }
 
   useEffect(() => {
-    if (initialPreset !== "developer") choosePreset(initialPreset);
-  }, [initialPreset]);
+    if (isRestored && !hasSavedBlueprint && initialPreset !== "developer") choosePreset(initialPreset);
+  }, [initialPreset, isRestored, hasSavedBlueprint]);
 
   function addChannel(type: ChannelType, name = type === "text" ? "new-channel" : "New voice room", categoryId?: string, isPrivate = false) {
     const id = `${type}-${Date.now()}`;
