@@ -431,9 +431,9 @@ function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
 }
 
 export default function Home() {
-  const [showDesigner, setShowDesigner] = useState(false);
-  const [initialPreset, setInitialPreset] = useState("developer");
-  useEffect(() => { if (showDesigner) { window.history.replaceState(null, "", window.location.pathname); window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); } }, [showDesigner]);
-  if (showDesigner) return <><div className="sticky top-0 z-50 flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2.5 backdrop-blur-xl"><Button variant="ghost" size="sm" onClick={() => setShowDesigner(false)}><ArrowLeft className="size-4"/> Back to home</Button><span className="hidden text-xs text-muted-foreground sm:inline">Serverly Studio · Preview only</span><span className="w-0 sm:w-[100px]"/></div><Designer key={initialPreset} initialPreset={initialPreset}/></>;
-  return <LandingPage onStart={(presetId) => { if (presetId) setInitialPreset(presetId); setShowDesigner(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} />;
+  function openStudio(presetId?: string) {
+    const query = presetId ? `?preset=${encodeURIComponent(presetId)}` : "";
+    window.location.assign(`/studio${query}`);
+  }
+  return <LandingPage onStart={openStudio} />;
 }
