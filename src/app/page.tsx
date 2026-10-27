@@ -175,6 +175,10 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     setNotice(preset ? `${preset.name} template loaded` : "Template loaded");
   }
 
+  useEffect(() => {
+    if (initialPreset !== "developer") choosePreset(initialPreset);
+  }, [initialPreset]);
+
   function addChannel(type: ChannelType) {
     const id = `${type}-${Date.now()}`;
     setCategories((current) => {
