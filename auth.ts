@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { and, eq } from "drizzle-orm";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
 import { db } from "@/db";
 
@@ -29,6 +30,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: adapter ? "database" : "jwt" },
   pages: { signIn: "/login" },
+  events: {
+    async signIn({ user, account }) {
+      // Re-consenting to Discord can grant the guilds scope to an existing account.
+      // Persist the newly issued token/scope so the server picker sees the updated grant.
+      if (account?.provider !== "discord" || !user.id || !db || !account.access_token) return;
+      await db.update(accounts).set({
+        access_token: account.access_token,
+        refresh_token: account.refresh_token ?? null,
+        expires_at: account.expires_at ?? null,
+        token_type: account.token_type ?? null,
+        scope: account.scope ?? null,
+        id_token: account.id_token ?? null,
+        session_state: account.session_state ?? null,
+      }).where(and(eq(accounts.userId, user.id), eq(accounts.provider, "discord")));
+    },
+  },
   callbacks: {
     authorized({ auth: session }) {
       return Boolean(session?.user);
