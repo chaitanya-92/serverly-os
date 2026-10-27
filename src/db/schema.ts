@@ -73,6 +73,7 @@ export const projects = pgTable("projects", {
   ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
+  discordGuildId: text("discord_guild_id"),
   document: jsonb("document").$type<BlueprintDocument>().notNull(),
   revision: integer("revision").notNull().default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
