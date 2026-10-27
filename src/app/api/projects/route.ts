@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   let discordGuildId: string | null = null;
 
   if (requestedGuildId) {
-    if (!/^\\d{17,20}$/.test(requestedGuildId)) {
+    if (!/^\d{17,20}$/.test(requestedGuildId)) {
       return NextResponse.json({ error: "Invalid Discord server ID" }, { status: 400 });
     }
     const db = requireDb();
