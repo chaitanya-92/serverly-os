@@ -293,7 +293,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </Button>;
             })}
           </div>
-        {showArchitectPromo && workspaceTab !== "ai" && typeof document !== "undefined" && createPortal(<AnimatePresence><motion.aside initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} className="fixed bottom-5 right-5 z-[100] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-border bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10"><div className="flex items-start justify-between gap-3"><span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary"><WandSparkles className="size-4" /></span><Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => setShowArchitectPromo(false)}><X className="size-3.5" /></Button></div><h3 className="mt-3 text-sm font-semibold">Have an idea?</h3><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let the Architect shape a tailored blueprint.</p><Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button></motion.aside></AnimatePresence>}
+
         </aside>
 
         <section className="min-w-0 space-y-5">
@@ -403,6 +403,20 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           
         </aside>
       </div>
+      {showArchitectPromo && workspaceTab !== "ai" && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          <motion.aside initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} className="fixed bottom-5 right-5 z-[100] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-border bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary"><WandSparkles className="size-4" /></span>
+              <Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => setShowArchitectPromo(false)}><X className="size-3.5" /></Button>
+            </div>
+            <h3 className="mt-3 text-sm font-semibold">Have an idea?</h3>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let the Architect shape a tailored blueprint.</p>
+            <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button>
+          </motion.aside>
+        </AnimatePresence>,
+        document.body
+      )}
       <AnimatePresence>
         {modal && <motion.div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/55 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) setModal(null); }}>
           <motion.div role="dialog" aria-modal="true" aria-labelledby="serverly-modal-title" className="my-auto w-full max-w-lg rounded-2xl border border-border bg-card text-card-foreground shadow-2xl" initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.18, ease: "easeOut" }}>
