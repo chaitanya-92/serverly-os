@@ -6,7 +6,7 @@ import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
-  Volume2, X, Zap, Moon, Sun,
+  Volume2, X, Zap, Moon, Sun, Download, Save,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,10 +57,56 @@ function Designer() {
   const [notice, setNotice] = useState("");
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [isRestored, setIsRestored] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("serverly-os:blueprint:v1");
+      if (raw) {
+        const saved = JSON.parse(raw) as { serverName?: string; selectedPreset?: string; selectedChannel?: string; categories?: Category[]; savedAt?: string };
+        if (typeof saved.serverName === "string") setServerName(saved.serverName);
+        if (typeof saved.selectedPreset === "string" && presets.some((preset) => preset.id === saved.selectedPreset)) setSelectedPreset(saved.selectedPreset);
+        if (Array.isArray(saved.categories)) setCategories(saved.categories);
+        if (typeof saved.selectedChannel === "string") setSelectedChannel(saved.selectedChannel);
+        if (typeof saved.savedAt === "string") setLastSavedAt(saved.savedAt);
+      }
+    } catch {
+      window.localStorage.removeItem("serverly-os:blueprint:v1");
+    } finally {
+      setIsRestored(true);
+    }
+  }, []);
+
+  function saveDraft() {
+    const savedAt = new Date().toISOString();
+    const blueprint = { schemaVersion: 1, serverName, selectedPreset, selectedChannel, categories, savedAt };
+    try {
+      window.localStorage.setItem("serverly-os:blueprint:v1", JSON.stringify(blueprint));
+      setLastSavedAt(savedAt);
+      setNotice("Draft saved on this device.");
+    } catch {
+      setNotice("Could not save locally. Check your browser storage settings.");
+    }
+  }
+
+  function exportBlueprint() {
+    const blueprint = { schemaVersion: 1, product: "Serverly OS", serverName, selectedPreset, selectedChannel, categories, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(blueprint, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${(serverName || "serverly-blueprint").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "serverly-blueprint"}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setNotice("Blueprint exported as JSON.");
+  }
 
   const activePreset = presets.find((preset) => preset.id === selectedPreset) ?? presets[0];
   const selected = useMemo(
@@ -143,7 +189,7 @@ function Designer() {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
           <Button variant="outline" size="icon" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}><span className="sr-only">Toggle theme</span>{theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}</Button>
-          <Button variant="outline" className="hidden sm:inline-flex" onClick={() => { setNotice("Blueprint saved locally for this preview"); }}><Check className="size-4" /> Save draft</Button>
+          <Button variant="outline" className="hidden sm:inline-flex" onClick={saveDraft} disabled={!isRestored}><Save className="size-4" /> Save draft</Button>
           <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
         </div>
       </header>
@@ -181,8 +227,8 @@ function Designer() {
 
         <section className="min-w-0 space-y-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">Last edited just now</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
-            <div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
+            <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Unsaved changes"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
+            <div className="flex flex-wrap items-center gap-2"><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
