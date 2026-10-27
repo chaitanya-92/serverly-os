@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
+  ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
   Volume2, X, Zap, Download, Save, Upload,
@@ -243,9 +243,11 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white "><LayoutGrid className="size-5" /></div>
           <div className="leading-tight"><div className="text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></div><div className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</div></div>
           <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
-          <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">Untitled server</span></div>
+          <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">{serverName || "Untitled server"}</span></div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => window.location.assign("/")} className="hidden text-muted-foreground sm:inline-flex"><ArrowLeft className="size-4" /> Home</Button>
+          <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" aria-label="Back to home" onClick={() => window.location.assign("/")}><ArrowLeft className="size-4" /></Button>
           <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
           <Button variant="outline" className="hidden sm:inline-flex" onClick={saveDraft} disabled={!isRestored}><Save className="size-4" /> Save draft</Button>
           <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
