@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight, LoaderCircle,
@@ -292,7 +293,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </Button>;
             })}
           </div>
-        {showArchitectPromo && workspaceTab !== "ai" && <AnimatePresence><motion.aside initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} className="fixed bottom-5 left-5 z-40 hidden w-[280px] rounded-xl border border-border bg-card p-4 shadow-2xl xl:block"><div className="flex items-start justify-between gap-3"><span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary"><WandSparkles className="size-4" /></span><Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => setShowArchitectPromo(false)}><X className="size-3.5" /></Button></div><h3 className="mt-3 text-sm font-semibold">Have an idea?</h3><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let the Architect shape a tailored blueprint.</p><Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button></motion.aside></AnimatePresence>}
+        {showArchitectPromo && workspaceTab !== "ai" && typeof document !== "undefined" && createPortal(<AnimatePresence><motion.aside initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} className="fixed bottom-5 right-5 z-[100] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-border bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10"><div className="flex items-start justify-between gap-3"><span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary"><WandSparkles className="size-4" /></span><Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => setShowArchitectPromo(false)}><X className="size-3.5" /></Button></div><h3 className="mt-3 text-sm font-semibold">Have an idea?</h3><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let the Architect shape a tailored blueprint.</p><Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button></motion.aside></AnimatePresence>}
         </aside>
 
         <section className="min-w-0 space-y-5">
