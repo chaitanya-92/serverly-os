@@ -5,6 +5,7 @@ import { requireDb } from "@/db";
 import { projects } from "@/db/schema";
 import { redirect } from "next/navigation";
 import { Plus, FolderOpen, LogOut, MessageCircle } from "lucide-react";
+import { ProjectActions } from "@/components/projects/project-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -47,12 +48,15 @@ export default async function ProjectsPage() {
           </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map((project) => <Link key={project.id} href={`/studio/${project.id}`} className="group border border-border bg-card p-5 transition-colors hover:border-primary/70">
-              <div className="flex items-start justify-between"><div className="flex h-10 w-10 items-center justify-center bg-secondary text-primary"><FolderOpen size={19}/></div><span className="text-xs text-muted-foreground">v{project.revision}</span></div>
-              <h2 className="mt-5 font-semibold group-hover:text-primary">{project.name}</h2>
-              <p className="mt-2 line-clamp-2 min-h-10 text-sm text-muted-foreground">{project.description ?? "Discord community blueprint"}</p>
-              <p className="mt-5 text-xs text-muted-foreground">Updated {project.updatedAt.toLocaleDateString()}</p>
-            </Link>)}
+            {rows.map((project) => <article key={project.id} className="border border-border bg-card p-5 transition-colors hover:border-primary/70">
+              <Link href={`/studio/${project.id}`} className="group block">
+                <div className="flex items-start justify-between"><div className="flex h-10 w-10 items-center justify-center bg-secondary text-primary"><FolderOpen size={19}/></div><span className="text-xs text-muted-foreground">v{project.revision}</span></div>
+                <h2 className="mt-5 font-semibold group-hover:text-primary">{project.name}</h2>
+                <p className="mt-2 line-clamp-2 min-h-10 text-sm text-muted-foreground">{project.description ?? "Discord community blueprint"}</p>
+                <p className="mt-5 text-xs text-muted-foreground">Updated {project.updatedAt.toLocaleDateString()}</p>
+              </Link>
+              <ProjectActions projectId={project.id} initialName={project.name} />
+            </article>)}
           </div>
         )}
       </section>
