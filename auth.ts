@@ -5,7 +5,12 @@ import { accounts, sessions, users, verificationTokens } from "@/db/schema";
 import { db } from "@/db";
 
 const adapter = db
-  ? DrizzleAdapter(db, { usersTable: users, accountsTable: accounts, sessionsTable: sessions, verificationTokensTable: verificationTokens })
+  ? DrizzleAdapter(db, {
+      usersTable: users,
+      accountsTable: accounts,
+      sessionsTable: sessions,
+      verificationTokensTable: verificationTokens,
+    })
   : undefined;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -14,6 +19,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Discord({
       clientId: process.env.AUTH_DISCORD_ID,
       clientSecret: process.env.AUTH_DISCORD_SECRET,
+      // Discord's issuer identifier is https://discord.com. Explicitly setting it
+      // avoids Auth.js treating its default issuer metadata as the expected value.
+      issuer: "https://discord.com",
       authorization: { params: { scope: "identify email" } },
     }),
   ],
