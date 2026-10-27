@@ -136,6 +136,12 @@ html { scroll-behavior: smooth; }
 
 .serverly-timed-toast {
   isolation: isolate;
+  animation: serverly-toast-enter 160ms ease-out both;
+}
+
+@keyframes serverly-toast-enter {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .serverly-toast-border-timer {
