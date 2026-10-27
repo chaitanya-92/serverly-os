@@ -87,6 +87,21 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (!isRestored) return;
+    const timer = window.setTimeout(() => {
+      const savedAt = new Date().toISOString();
+      const blueprint = { schemaVersion: 1, serverName, selectedPreset, selectedChannel, categories, visibility, roles, savedAt };
+      try {
+        window.localStorage.setItem("serverly-os:blueprint:v1", JSON.stringify(blueprint));
+        setLastSavedAt(savedAt);
+      } catch {
+        setNotice("Auto-save unavailable. Use Export JSON to keep a backup.");
+      }
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [isRestored, serverName, selectedPreset, selectedChannel, categories, visibility, roles]);
+
   function saveDraft() {
     const savedAt = new Date().toISOString();
     const blueprint = { schemaVersion: 1, serverName, selectedPreset, selectedChannel, categories, visibility, roles, savedAt };
