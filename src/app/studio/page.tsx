@@ -262,7 +262,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         </div>
       </header>
 
-      <div className={`mx-auto grid max-w-[1800px] grid-cols-1 gap-4 p-4 lg:p-5 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-6">
+      <div className={`mx-auto grid max-w-[1800px] grid-cols-1 gap-4 p-4 lg:p-5 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-6`}>
         <aside className={`space-y-4 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start ${sidebarCollapsed ? "xl:overflow-visible" : "xl:overflow-y-auto xl:overscroll-contain"} xl:pr-1`}>
           <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div><Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><MoreHorizontal className="size-4" /></Button></div>
           <nav className="space-y-1">
