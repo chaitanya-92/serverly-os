@@ -57,6 +57,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [workspaceTab, setWorkspaceTab] = useState<"designer" | "ai" | "templates">("designer");
   const [search, setSearch] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [channelDraft, setChannelDraft] = useState({ name: "new-channel", type: "text" as ChannelType, categoryId: "welcome", isPrivate: false });
   const [categoryDraft, setCategoryDraft] = useState({ name: "NEW CATEGORY", categoryId: "" });
@@ -287,6 +288,18 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         </aside>
 
         <section className="min-w-0 space-y-5">
+
+          {workspaceTab === "ai" && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+            <div><Badge variant="subtle">BLUEPRINT ARCHITECT</Badge><h1 className="mt-3 text-3xl font-semibold">Describe your community<span className="text-primary">.</span></h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Create an editable starter structure from your community brief.</p></div>
+            <Card><CardContent className="space-y-4 p-5"><label htmlFor="architect-prompt" className="text-sm font-medium">What are you building?</label><textarea id="architect-prompt" value={aiPrompt} onChange={(event) => setAiPrompt(event.target.value)} rows={4} maxLength={1000} placeholder="A gaming community with squad voice rooms, clips, rules and private moderator spaces…" className="w-full resize-y rounded-lg border border-input bg-background px-3 py-3 text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring" /><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><span className="text-xs text-muted-foreground">{aiPrompt.length}/1000 · Curated blueprint matching</span><Button onClick={() => { const brief = aiPrompt.trim().toLowerCase(); if (!brief) { setNotice("Describe your community first."); return; } const target = /game|gaming|esport|squad|guild|raid/.test(brief) ? "gaming" : /study|student|class|learning|exam|focus/.test(brief) ? "study" : /creator|stream|artist|fan|content|audience/.test(brief) ? "creator" : "developer"; choosePreset(target); setWorkspaceTab("designer"); setNotice("Blueprint generated from your brief using a curated template. Customize it before export."); }}><WandSparkles className="size-4" /> Generate blueprint</Button></div></CardContent></Card>
+            <p className="text-xs text-muted-foreground">Uses local rules and curated templates; no external AI model is connected.</p>
+          </motion.div>}
+          {workspaceTab === "templates" && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+            <div><Badge variant="subtle">TEMPLATE LIBRARY</Badge><h1 className="mt-3 text-3xl font-semibold">A better starting point<span className="text-primary">.</span></h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Load a blueprint, then customize its categories, channels and access.</p></div>
+            <div className="grid gap-3 sm:grid-cols-2">{presets.map((preset, index) => { const Icon = preset.icon; return <Card key={preset.id}><CardContent className="flex h-full flex-col p-5"><div className="flex items-center justify-between"><span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary"><Icon className="size-5" /></span><Badge variant="outline">0{index + 1}</Badge></div><h2 className="mt-4 font-semibold">{preset.name}</h2><p className="mt-2 min-h-10 text-sm text-muted-foreground">{preset.description}</p><Button className="mt-5 w-full" variant={selectedPreset === preset.id ? "default" : "outline"} onClick={() => { choosePreset(preset.id); setWorkspaceTab("designer"); }}>Use this template <ArrowRight className="size-4" /></Button></CardContent></Card>; })}</div>
+          </motion.div>}
+          {workspaceTab === "designer" && <>
+
           <div className="space-y-4">
             <div><div className="mb-2 flex flex-wrap items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Auto-saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Saving changes locally…"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
             <div className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto rounded-xl border border-border bg-card p-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" className="shrink-0" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={() => setModal("reset")}><ArrowDown className="size-3.5" /> Reset</Button><span className="mx-1 h-6 w-px shrink-0 bg-border" /><Button size="sm" className="shrink-0" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
@@ -346,6 +359,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             </div>
           </Card>
           {notice && <div role="status" className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.07] px-4 py-3 text-sm text-primary"><span className="flex items-center gap-2"><Check className="size-4 shrink-0" />{notice}</span><Button variant="ghost" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-4" /></Button></div>}
+          </>}
+
         </section>
 
         <aside id="inspector" className="space-y-4 xl:sticky xl:top-[136px] xl:max-h-[calc(100vh-152px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
