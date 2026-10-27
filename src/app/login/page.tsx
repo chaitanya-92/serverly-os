@@ -4,7 +4,7 @@ import { MessageCircle, ShieldCheck } from "lucide-react";
 
 export default async function LoginPage() {
   const session = await auth();
-  if (session?.user) redirect("/projects");
+  if (session?.user) redirect("/servers");
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
@@ -18,8 +18,8 @@ export default async function LoginPage() {
         </div>
         <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary">Welcome back</p>
         <h1 className="text-3xl font-semibold tracking-tight">Build your server blueprint.</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">Sign in with Discord to manage your projects. You can connect a real server later, only when you need to import or publish.</p>
-        <form className="mt-8" action={async () => { "use server"; await signIn("discord", { redirectTo: "/projects" }); }}>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Sign in with Discord to choose a server you manage or create a new blueprint. Server changes remain separate until you deploy.</p>
+        <form className="mt-8" action={async () => { "use server"; await signIn("discord", { redirectTo: "/servers" }); }}>
           <button className="flex h-12 w-full items-center justify-center gap-2 bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
             <MessageCircle size={18} /> Continue with Discord
           </button>
