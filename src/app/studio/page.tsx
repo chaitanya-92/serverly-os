@@ -74,7 +74,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [isRestored, setIsRestored] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
-  const [showArchitectPromo, setShowArchitectPromo] = useState(true);
+  const [showArchitectPromo, setShowArchitectPromo] = useState(false);
 
   useEffect(() => {
     try {
@@ -93,6 +93,18 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
       window.localStorage.removeItem("serverly-os:blueprint:v1");
     } finally {
       setIsRestored(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const alreadyShown = window.localStorage.getItem("serverly-os:architect-promo-seen:v1") === "1";
+      if (!alreadyShown) {
+        setShowArchitectPromo(true);
+        window.localStorage.setItem("serverly-os:architect-promo-seen:v1", "1");
+      }
+    } catch {
+      // Keep the workspace usable when browser storage is unavailable.
     }
   }, []);
 
@@ -367,7 +379,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
         </section>
 
-        <aside id="inspector" className="space-y-2 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-92px)] xl:self-start xl:overflow-hidden xl:pr-0">
+        <aside id="inspector" className="space-y-2 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-92px)] xl:min-h-0 xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-1 text-base font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Server identity and channel settings.</p></div>
           <Card>
             <CardContent className="space-y-2.5 p-3">
@@ -379,7 +391,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
           <Card>
             <div className="flex border-b border-border px-2 pt-2"><Button variant="ghost" onClick={() => setActiveTab("structure")} className={`flex-1 border-b-2 px-3 py-2.5 text-xs font-medium transition ${activeTab === "structure" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Channel</Button><Button variant="ghost" onClick={() => setActiveTab("roles")} className={`flex-1 border-b-2 px-3 py-2.5 text-xs font-medium transition ${activeTab === "roles" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Roles & access</Button></div>
-            <CardContent className="space-y-4 p-4">
+            <CardContent className="space-y-3 p-3">
               {activeTab === "structure" ? <>
                 <div><label htmlFor="channel-name" className="mb-2 block text-xs font-medium text-muted-foreground">Channel name</label><Input id="channel-name" value={selected?.name ?? ""} disabled={!selected} onChange={(event) => renameSelected(event.target.value)} placeholder="Select a channel" className="h-9" /></div>
                 <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Channel type</label><div className="grid grid-cols-2 gap-2"><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, type: "text" } : channel) })))} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs transition disabled:opacity-40 ${selected?.type === "text" ? "border-primary/40 bg-primary/[0.08] text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><Hash className="size-3.5" /> Text</Button><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, type: "voice" } : channel) })))} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs transition disabled:opacity-40 ${selected?.type === "voice" ? "border-primary/40 bg-primary/[0.08] text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><Volume2 className="size-3.5" /> Voice</Button></div></div>
@@ -393,8 +405,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             </CardContent>
           </Card>
           <Card className="border-border/80 bg-card/60">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-sm font-medium"><ShieldCheck className="size-4 text-emerald-400" /> Pre-deployment checks</div>
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-4 text-emerald-400" /> Pre-deployment checks</div>
               <div className="mt-3 space-y-2.5 text-xs"><div className="flex items-center gap-2 text-muted-foreground"><Check className="size-3.5 text-emerald-400" /> Channel structure <span className="ml-auto text-emerald-300">Ready</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Permissions audit <span className="ml-auto text-amber-200">Pending</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Discord connection <span className="ml-auto text-amber-200">Not linked</span></div></div>
             </CardContent>
           </Card>
@@ -406,11 +418,11 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           <motion.aside initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} className="fixed bottom-5 right-5 z-[100] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-border bg-card p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10">
             <div className="flex items-start justify-between gap-3">
               <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary"><WandSparkles className="size-4" /></span>
-              <Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => setShowArchitectPromo(false)}><X className="size-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="size-7 -mr-1 -mt-1 text-muted-foreground" aria-label="Dismiss AI Architect tip" onClick={() => { setShowArchitectPromo(false); try { window.localStorage.setItem("serverly-os:architect-promo-seen:v1", "1"); } catch {} }}><X className="size-3.5" /></Button>
             </div>
             <h3 className="mt-3 text-sm font-semibold">Have an idea?</h3>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let the Architect shape a tailored blueprint.</p>
-            <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button>
+            <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => { setShowArchitectPromo(false); try { window.localStorage.setItem("serverly-os:architect-promo-seen:v1", "1"); } catch {} setWorkspaceTab("ai"); setNotice(""); }}><Sparkles className="size-3.5" /> Try AI Architect <ArrowRight className="size-3.5" /></Button>
           </motion.aside>
         </AnimatePresence>,
         document.body
