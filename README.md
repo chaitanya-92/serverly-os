@@ -2,53 +2,43 @@
 
 **Your community. Your architecture.**
 
-Serverly OS is a visual workspace for planning Discord communities. Build a channel hierarchy, start from a community template, preview the structure, and move blueprint data between sessions without touching Discord settings.
+Serverly OS is a visual workspace for planning Discord communities. The current build adds Discord-only authentication, a private-by-default project workspace, and a Neon/PostgreSQL persistence foundation.
 
-## Current product capabilities
-
-- Animated, responsive product landing page using Framer Motion
-- Midnight Violet design system with light and dark themes
-- Community starter presets: Developer Hub, Gaming Community, Creator Club, and Study Group
-- Discord-style structure preview with text and voice channels
-- Add, rename, remove, and change channel types
-- Create categories and rename category labels
-- Mark channels as private in the local blueprint
-- Search channels and inspect the selected channel
-- Save and restore a draft in browser local storage
-- Import and export a versioned JSON blueprint
-
-## Getting started
+## Local setup
 
 Requirements: Node.js 20+ and npm.
 
+1. Copy `.env.example` to `.env.local`.
+2. In Neon Console, open **Connect**, select your database and role, and copy the PostgreSQL connection string into `DATABASE_URL`.
+3. Create an OAuth application in the Discord Developer Portal. Set the local redirect URI to `http://localhost:3000/api/auth/callback/discord`, then copy its client ID and secret into `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET`.
+4. Generate a local Auth.js secret and set `AUTH_SECRET`.
+5. Install dependencies, generate the migration, apply it, and start Next.js:
+
 ```bash
 npm install
+npx drizzle-kit generate
+npx drizzle-kit migrate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000/login](http://localhost:3000/login) to sign in, then open the projects dashboard.
 
-Useful scripts:
+## Important: use a PostgreSQL connection string
 
-```bash
-npm run lint
-npm run build
-npm start
+The URL ending in `/rest/v1` is a REST endpoint, not the standard Neon PostgreSQL connection string Drizzle needs. In Neon Console, use **Connect** to copy a URL shaped like:
+
+```text
+postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 ```
 
-## Blueprint format
+Keep that URL in `.env.local` only. Do not commit it or paste the password into source files.
 
-Blueprints export as JSON with `schemaVersion: 1`, server metadata, selected template/channel, and a list of categories containing text/voice channels. Keep exported files as backups or use Import JSON to restore a blueprint. Import validates the basic structure before applying it.
+## Current local implementation scope
 
-## Roadmap
+- Discord-only Auth.js sign-in
+- Neon/PostgreSQL access through Drizzle ORM
+- Owner-scoped project records with a JSONB blueprint document
+- Version-history, read-only share-link, and deployment-operation schema foundations
+- Authenticated projects dashboard and starter blueprint creation
 
-1. **Core editor hardening** — automated tests, accessible category/channel dialogs, validation, and improved error states.
-2. **Real persistence and accounts** — database-backed projects, authentication, saved versions, and multi-device sync.
-3. **Permission modelling** — roles, channel overrides, and pre-deployment validation.
-4. **Discord integration** — official OAuth flow and an authorized integration that applies a user-confirmed blueprint.
-5. **AI architect** — generate editable blueprints from a community description.
-6. **Template library** — duplicate, publish, and share templates.
-
-## Current limitations
-
-This is an early product foundation. Drafts are stored in the current browser only; JSON export/import is portable, but there is no hosted database or account sync yet. Roles and permissions are illustrative and are not applied to Discord. Deploy server is intentionally a placeholder until official Discord authorization and safe publishing are implemented.
+The existing Studio is still being migrated from local-only draft storage to project-backed persistence. Discord server import/publishing and share-link UI are not yet wired up.
