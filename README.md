@@ -40,4 +40,4 @@ Keep real credentials in `.env.local` only. Never commit `.env` or `.env.local`,
 - Owner-scoped project read/update/delete API
 - Session-aware root route and projects dashboard
 
-The full interactive editor's database autosave, complete version-history interface, share-link management UI, and Discord server import/publishing are still in progress. Do not treat those features as complete until they have been implemented and tested locally.
+The existing interactive editor is integrated into project Studio with debounced PostgreSQL autosave and a visible save state. Owner-scoped APIs exist for version snapshots/restores and hashed read-only share links, including a public read-only share view and revocation endpoint. The dashboard includes project rename/delete controls. The version/share APIs and autosave still require local end-to-end verification; a full UI for browsing/restoring versions and managing/revoking links is not yet complete. Discord server import/publishing is also not implemented.
