@@ -69,12 +69,14 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     try {
       const raw = window.localStorage.getItem("serverly-os:blueprint:v1");
       if (raw) {
-        const saved = JSON.parse(raw) as { serverName?: string; selectedPreset?: string; selectedChannel?: string; categories?: Category[]; savedAt?: string };
+        const saved = JSON.parse(raw) as { serverName?: string; selectedPreset?: string; selectedChannel?: string; categories?: Category[]; savedAt?: string; visibility?: "public" | "private"; roles?: ServerRole[] };
         if (typeof saved.serverName === "string") setServerName(saved.serverName);
         if (typeof saved.selectedPreset === "string" && presets.some((preset) => preset.id === saved.selectedPreset)) setSelectedPreset(saved.selectedPreset);
         if (Array.isArray(saved.categories)) setCategories(saved.categories);
         if (typeof saved.selectedChannel === "string") setSelectedChannel(saved.selectedChannel);
         if (typeof saved.savedAt === "string") setLastSavedAt(saved.savedAt);
+        if (saved.visibility === "public" || saved.visibility === "private") setVisibility(saved.visibility);
+        if (Array.isArray(saved.roles) && saved.roles.every((role) => role && typeof role.id === "string" && typeof role.name === "string" && Array.isArray(role.permissions))) setRoles(saved.roles);
       }
     } catch {
       window.localStorage.removeItem("serverly-os:blueprint:v1");
@@ -85,7 +87,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
   function saveDraft() {
     const savedAt = new Date().toISOString();
-    const blueprint = { schemaVersion: 1, serverName, selectedPreset, selectedChannel, categories, savedAt };
+    const blueprint = { schemaVersion: 1, serverName, selectedPreset, selectedChannel, categories, visibility, roles, savedAt };
     try {
       window.localStorage.setItem("serverly-os:blueprint:v1", JSON.stringify(blueprint));
       setLastSavedAt(savedAt);
@@ -100,7 +102,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     try {
       const parsed: unknown = JSON.parse(await file.text());
       if (!parsed || typeof parsed !== "object") throw new Error("invalid");
-      const candidate = parsed as { serverName?: unknown; selectedPreset?: unknown; selectedChannel?: unknown; categories?: unknown };
+      const candidate = parsed as { serverName?: unknown; selectedPreset?: unknown; selectedChannel?: unknown; categories?: unknown; visibility?: unknown; roles?: unknown };
       if (typeof candidate.serverName !== "string" || !Array.isArray(candidate.categories)) throw new Error("invalid");
       const validCategories = candidate.categories.every((category) => {
         if (!category || typeof category !== "object") return false;
@@ -118,6 +120,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
       setServerName(candidate.serverName.slice(0, 100));
       setSelectedPreset(presetId);
       setCategories(importedCategories);
+      if (candidate.visibility === "public" || candidate.visibility === "private") setVisibility(candidate.visibility);
+      if (Array.isArray(candidate.roles) && candidate.roles.every((role) => role && typeof role === "object" && typeof (role as ServerRole).id === "string" && typeof (role as ServerRole).name === "string" && Array.isArray((role as ServerRole).permissions))) setRoles(candidate.roles as ServerRole[]);
       const allChannels = importedCategories.flatMap((category) => category.channels);
       setSelectedChannel(typeof candidate.selectedChannel === "string" && allChannels.some((channel) => channel.id === candidate.selectedChannel) ? candidate.selectedChannel : (allChannels[0]?.id ?? ""));
       setNotice("Blueprint imported. Save the draft to keep it on this device.");
@@ -127,7 +131,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   }
 
   function exportBlueprint() {
-    const blueprint = { schemaVersion: 1, product: "Serverly OS", serverName, selectedPreset, selectedChannel, categories, exportedAt: new Date().toISOString() };
+    const blueprint = { schemaVersion: 1, product: "Serverly OS", serverName, selectedPreset, selectedChannel, categories, visibility, roles, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(blueprint, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -265,7 +269,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         <section className="min-w-0 space-y-5">
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Unsaved changes"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
-            <div className="flex flex-wrap items-center gap-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
+            <div className="flex flex-wrap items-center justify-end gap-2 rounded-xl border border-border bg-card p-2 sm:ml-4"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => setModal("reset")><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -324,13 +328,13 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           {notice && <div role="status" className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.07] px-4 py-3 text-sm text-primary"><span className="flex items-center gap-2"><Check className="size-4 shrink-0" />{notice}</span><Button variant="ghost" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-4" /></Button></div>}
         </section>
 
-        <aside id="inspector" className="space-y-4 xl:sticky xl:top-[88px] xl:max-h-[calc(100vh-104px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
+        <aside id="inspector" className="space-y-4 xl:sticky xl:top-[136px] xl:max-h-[calc(100vh-152px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-2 text-lg font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Tune your server identity and selected channel.</p></div>
           <Card>
             <CardContent className="space-y-4 p-4">
               <div><label htmlFor="server-name" className="mb-2 block text-xs font-medium text-muted-foreground">Server name</label><Input id="server-name" value={serverName} onChange={(event) => setServerName(event.target.value)} className="h-9" /></div>
-              <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Server category</label><div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-sm"><activePreset.icon className="size-4 text-primary" />{activePreset.name}<ChevronDown className="ml-auto size-4 text-muted-foreground" /></div></div>
-              <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Visibility</label><div className="grid grid-cols-2 gap-2"><Button variant="ghost" onClick={() => setNotice("Public visibility selected for this blueprint.")} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/[0.08] px-2 py-2.5 text-xs font-medium"><MessageCircle className="size-3.5 text-primary" /> Public</Button><Button variant="ghost" onClick={() => setNotice("Private visibility selected for this blueprint.")} className="flex items-center justify-center gap-2 rounded-lg border border-border px-2 py-2.5 text-xs text-muted-foreground hover:bg-secondary"><LockKeyhole className="size-3.5" /> Private</Button></div></div>
+              <div><label htmlFor="server-category" className="mb-2 block text-xs font-medium text-muted-foreground">Server category</label><div className="relative"><select id="server-category" value={selectedPreset} onChange={(event) => choosePreset(event.target.value)} className="h-10 w-full appearance-none rounded-lg border border-input bg-background pl-3 pr-9 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">{presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div></div>
+              <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Visibility</label><div className="grid grid-cols-2 gap-2"><Button type="button" variant="ghost" aria-pressed={visibility === "public"} onClick={() => { setVisibility("public"); setNotice("Blueprint visibility set to public."); }} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs font-medium ${visibility === "public" ? "border-primary/50 bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><MessageCircle className="size-3.5" /> Public</Button><Button type="button" variant="ghost" aria-pressed={visibility === "private"} onClick={() => { setVisibility("private"); setNotice("Blueprint visibility set to private."); }} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs font-medium ${visibility === "private" ? "border-primary/50 bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><LockKeyhole className="size-3.5" /> Private</Button></div><p className="mt-1.5 text-[11px] text-muted-foreground">{visibility === "public" ? "Anyone can discover this planned community." : "Plan this server as invite-only."}</p></div>
             </CardContent>
           </Card>
 
