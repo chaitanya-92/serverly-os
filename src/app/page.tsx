@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
@@ -17,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 type ChannelType = "text" | "voice";
 type Channel = { id: string; name: string; type: ChannelType; locked?: boolean };
 type Category = { id: string; name: string; channels: Channel[] };
+type ServerRole = { id: string; name: string; description: string; color: string; permissions: string[] };
+type ModalState = "channel" | "role" | "category" | "rename-category" | null;
 
 const starterCategories: Category[] = [
   { id: "welcome", name: "START HERE", channels: [
@@ -53,16 +55,15 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [selectedChannel, setSelectedChannel] = useState("general");
   const [serverName, setServerName] = useState("Devspace");
   const [search, setSearch] = useState("");
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [modal, setModal] = useState<ModalState>(null);
+  const [channelDraft, setChannelDraft] = useState({ name: "new-channel", type: "text" as ChannelType, categoryId: "welcome", isPrivate: false });
+  const [categoryDraft, setCategoryDraft] = useState({ name: "NEW CATEGORY", categoryId: "" });
+  const [roleDraft, setRoleDraft] = useState({ name: "", description: "", color: "#D9A441", permissions: ["View channels", "Send messages"] });
+  const [roles, setRoles] = useState<ServerRole[]>([{ id: "owner", name: "Owner", description: "Full server access", color: "#D9A441", permissions: ["Manage server", "Manage channels", "Manage roles", "View channels", "Send messages"] }, { id: "moderator", name: "Moderator", description: "Manage community", color: "#D9A441", permissions: ["Manage messages", "Kick members", "View channels", "Send messages"] }, { id: "member", name: "Member", description: "Standard access", color: "#D9A441", permissions: ["View channels", "Send messages"] }]);
   const [notice, setNotice] = useState("");
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [isRestored, setIsRestored] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
 
   useEffect(() => {
     try {
@@ -179,16 +180,17 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     if (initialPreset !== "developer") choosePreset(initialPreset);
   }, [initialPreset]);
 
-  function addChannel(type: ChannelType) {
+  function addChannel(type: ChannelType, name = type === "text" ? "new-channel" : "New voice room", categoryId?: string, isPrivate = false) {
     const id = `${type}-${Date.now()}`;
     setCategories((current) => {
       const next = [...current];
       if (next.length === 0) next.push({ id: "new-category", name: "NEW CATEGORY", channels: [] });
-      next[0] = { ...next[0], channels: [...next[0].channels, { id, name: type === "text" ? "new-channel" : "New voice room", type }] };
+      const targetIndex = Math.max(0, next.findIndex((category) => category.id === categoryId));
+      next[targetIndex] = { ...next[targetIndex], channels: [...next[targetIndex].channels, { id, name, type, locked: isPrivate }] };
       return next;
     });
     setSelectedChannel(id);
-    setShowCreateMenu(false);
+    setModal(null);
     setNotice(type === "text" ? "Text channel added" : "Voice channel added");
   }
 
@@ -216,21 +218,20 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     <main className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_28px_var(--brand-glow)]"><LayoutGrid className="size-5" /></div>
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white "><LayoutGrid className="size-5" /></div>
           <div className="leading-tight"><div className="text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></div><div className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</div></div>
           <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
           <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">Untitled server</span></div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
-          <Button variant="outline" size="icon" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}><span className="sr-only">Toggle theme</span>{theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}</Button>
           <Button variant="outline" className="hidden sm:inline-flex" onClick={saveDraft} disabled={!isRestored}><Save className="size-4" /> Save draft</Button>
           <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
         </div>
       </header>
 
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 p-4 md:p-6 xl:grid-cols-[250px_minmax(0,1fr)_292px] xl:gap-6 xl:p-8">
-        <aside className="space-y-5">
+        <aside className="space-y-5 xl:sticky xl:top-[88px] xl:max-h-[calc(100vh-104px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
           <nav className="space-y-1">
             <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg bg-accent px-3 py-2.5 text-left text-sm font-medium text-accent-foreground"><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
@@ -243,7 +244,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             {presets.map((preset) => {
               const Icon = preset.icon;
               const isActive = selectedPreset === preset.id;
-              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] shadow-[0_0_0_1px_var(--brand-glow)]" : "border-transparent hover:border-border hover:bg-card"}`}>
+              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] " : "border-transparent hover:border-border hover:bg-card"}`}>
                 <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
                 <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div><div className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{preset.description}</div></div>
                 {isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}
@@ -263,7 +264,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         <section className="min-w-0 space-y-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Unsaved changes"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
-            <div className="flex flex-wrap items-center gap-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
+            <div className="flex flex-wrap items-center gap-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -273,7 +274,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             })}
           </div>
 
-          {showCreateMenu && <Card className="border-primary/30"><CardContent className="flex flex-wrap items-center justify-between gap-3 p-3"><div><div className="text-sm font-medium">Add a channel</div><div className="text-xs text-muted-foreground">Choose the channel type to add to the first category.</div></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => addChannel("text")}><Hash className="size-4" /> Text channel</Button><Button variant="outline" size="sm" onClick={() => addChannel("voice")}><Volume2 className="size-4" /> Voice channel</Button><Button variant="ghost" size="icon" onClick={() => setShowCreateMenu(false)} aria-label="Close"><X className="size-4" /></Button></div></CardContent></Card>}
+          
 
           <Card className="overflow-hidden border-border/80">
             <div className="flex flex-col justify-between gap-3 border-b border-border bg-card/70 p-4 sm:flex-row sm:items-center sm:px-5">
@@ -289,7 +290,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                     const visibleChannels = category.channels.filter((channel) => channel.name.toLowerCase().includes(search.toLowerCase()));
                     if (search && visibleChannels.length === 0) return null;
                     return <div key={category.id}>
-                      <div className="group mb-1 flex items-center justify-between px-1.5 text-[10px] font-bold tracking-[0.13em] text-[var(--discord-muted)]"><span className="flex items-center gap-1"><ChevronDown className="size-3" />{category.name}</span><Button variant="ghost" className="opacity-0 transition group-hover:opacity-100" onClick={() => { const newName = prompt("Rename category", category.name); if (newName?.trim()) setCategories((current) => current.map((item) => item.id === category.id ? { ...item, name: newName.trim().toUpperCase() } : item)); }} aria-label={`Rename ${category.name}`}><MoreHorizontal className="size-3.5" /></Button></div>
+                      <div className="group mb-1 flex items-center justify-between px-1.5 text-[10px] font-bold tracking-[0.13em] text-[var(--discord-muted)]"><span className="flex items-center gap-1"><ChevronDown className="size-3" />{category.name}</span><Button variant="ghost" className="opacity-0 transition group-hover:opacity-100" onClick={() => { setCategoryDraft({ name: category.name, categoryId: category.id }); setModal("rename-category"); }} aria-label={`Rename ${category.name}`}><MoreHorizontal className="size-3.5" /></Button></div>
                       <div className="space-y-0.5">
                         {visibleChannels.map((channel) => {
                           const active = selectedChannel === channel.id;
@@ -301,14 +302,14 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                       </div>
                     </div>;
                   })}
-                  <Button variant="ghost" onClick={() => { const name = prompt("New category name", "NEW CATEGORY"); if (name?.trim()) setCategories((current) => [...current, { id: `category-${Date.now()}`, name: name.trim().toUpperCase(), channels: [] }]); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
+                  <Button variant="ghost" onClick={() => { setCategoryDraft({ name: "NEW CATEGORY", categoryId: "" }); setModal("category"); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
                 </div>
                 <div className="mt-6 rounded-lg border border-dashed border-border p-3"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-700 dark:text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
               </div>
               <div className="flex min-w-0 flex-col bg-[var(--discord-main)]">
                 <div className="flex items-center gap-3 border-b border-border/80 px-4 py-3"><Hash className="size-4 text-primary" /><span className="text-sm font-semibold">{selected?.name ?? "Select a channel"}</span><Separator orientation="vertical" className="h-4" /><span className="truncate text-xs text-muted-foreground">{selected?.type === "voice" ? "Voice channel" : "Text channel"}</span><div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Notifications" onClick={() => setNotice("Channel notification settings will be available in a future iteration.")}><Bell className="size-4" /></Button><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Channel options" onClick={() => setNotice("Select a channel and edit its details in the inspector.")}><MoreHorizontal className="size-4" /></Button></div></div>
                 <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/[0.09] text-primary shadow-[0_0_45px_var(--brand-glow)]">{selected?.type === "voice" ? <Volume2 className="size-7" /> : <Hash className="size-7" />}</div>
+                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/[0.09] text-primary ">{selected?.type === "voice" ? <Volume2 className="size-7" /> : <Hash className="size-7" />}</div>
                   <Badge variant="outline" className="mb-3 border-border/80 text-muted-foreground">{selected?.type === "voice" ? "VOICE ROOM" : "TEXT CHANNEL"}</Badge>
                   <h2 className="text-xl font-semibold tracking-tight">{selected?.name ?? "Choose a channel"}</h2>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{selected?.type === "voice" ? "A place for members to talk, collaborate, or hang out together." : "This is where your community conversation will happen. Add a topic to tell members what belongs here."}</p>
@@ -322,7 +323,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           {notice && <div role="status" className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.07] px-4 py-3 text-sm text-primary"><span className="flex items-center gap-2"><Check className="size-4 shrink-0" />{notice}</span><Button variant="ghost" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-4" /></Button></div>}
         </section>
 
-        <aside id="inspector" className="space-y-4">
+        <aside id="inspector" className="space-y-4 xl:sticky xl:top-[88px] xl:max-h-[calc(100vh-104px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-2 text-lg font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Tune your server identity and selected channel.</p></div>
           <Card>
             <CardContent className="space-y-4 p-4">
@@ -342,10 +343,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                 <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-medium">Private channel</div><div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Limit visibility to selected roles.</div></div><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, locked: !channel.locked } : channel) })))} className={`relative mt-0.5 h-5 w-9 rounded-full transition disabled:opacity-40 ${selected?.locked ? "bg-primary" : "bg-secondary"}`} aria-label="Toggle private channel"><span className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${selected?.locked ? "left-[18px]" : "left-0.5"}`} /></Button></div>
                 <Button variant="destructive" className="w-full" disabled={!selected} onClick={removeSelected}><X className="size-4" /> Remove channel</Button>
               </> : <>
-                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-amber-400/10 text-amber-700 dark:text-amber-300"><Crown className="size-4" /></div><div><div className="text-sm font-medium">Owner</div><div className="text-[11px] text-muted-foreground">Full server access</div></div><Badge variant="outline" className="ml-auto">1</Badge></div></div>
-                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="size-4" /></div><div><div className="text-sm font-medium">Moderator</div><div className="text-[11px] text-muted-foreground">Manage community</div></div><Badge variant="outline" className="ml-auto">3</Badge></div></div>
-                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-emerald-400/10 text-emerald-700 dark:text-emerald-300"><MessageCircle className="size-4" /></div><div><div className="text-sm font-medium">Member</div><div className="text-[11px] text-muted-foreground">Standard access</div></div><Badge variant="outline" className="ml-auto">∞</Badge></div></div>
-                <Button variant="outline" className="w-full" onClick={() => setNotice("Role editor is planned next. These are illustrative roles only.")}><Plus className="size-4" /> Add role</Button>
+                {roles.map((role) => <div key={role.id} className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg border border-border" style={{ color: role.color, backgroundColor: `${role.color}18` }}><ShieldCheck className="size-4" /></div><div className="min-w-0 flex-1"><div className="truncate text-sm font-medium">{role.name}</div><div className="text-[11px] text-muted-foreground">{role.description}</div></div><Badge variant="outline">{role.permissions.length}</Badge></div>{!["owner", "moderator", "member"].includes(role.id) && <div className="mt-2 flex justify-end"><Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-destructive" onClick={() => setRoles((current) => current.filter((item) => item.id !== role.id))}>Remove role</Button></div>}</div>)}
+                <Button variant="outline" className="w-full" onClick={() => { setRoleDraft({ name: "", description: "", color: "#D9A441", permissions: ["View channels", "Send messages"] }); setModal("role"); }}><Plus className="size-4" /> Add role</Button>
               </>}
             </CardContent>
           </Card>
@@ -358,6 +357,21 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           <div className="flex items-center justify-center gap-2 py-1 text-[10px] text-muted-foreground"><Command className="size-3" /> Built for communities, by Serverly OS</div>
         </aside>
       </div>
+      <AnimatePresence>
+        {modal && <motion.div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/55 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) setModal(null); }}>
+          <motion.div role="dialog" aria-modal="true" aria-labelledby="serverly-modal-title" className="my-auto w-full max-w-lg rounded-2xl border border-border bg-card text-card-foreground shadow-2xl" initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.18, ease: "easeOut" }}>
+            <form onSubmit={(event) => { event.preventDefault(); if (modal === "channel") { const clean = channelDraft.name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-_]/g, ""); if (!clean || !channelDraft.categoryId) return; addChannel(channelDraft.type, clean, channelDraft.categoryId, channelDraft.isPrivate); } else if (modal === "role") { const clean = roleDraft.name.trim(); if (!clean) return; setRoles((current) => [...current, { id: `role-${Date.now()}`, name: clean, description: roleDraft.description.trim() || "Custom community role", color: roleDraft.color, permissions: roleDraft.permissions }]); setModal(null); setActiveTab("roles"); setNotice("Role added to this local blueprint."); } else if (modal === "category") { const clean = categoryDraft.name.trim(); if (!clean) return; setCategories((current) => [...current, { id: `category-${Date.now()}`, name: clean.toUpperCase(), channels: [] }]); setModal(null); setNotice("Category added."); } else if (modal === "rename-category") { const clean = categoryDraft.name.trim(); if (!clean) return; setCategories((current) => current.map((item) => item.id === categoryDraft.categoryId ? { ...item, name: clean.toUpperCase() } : item)); setModal(null); setNotice("Category renamed."); } }}>
+              <div className="flex items-start justify-between gap-4 border-b border-border p-5"><div><div className="text-xs font-semibold uppercase tracking-[.14em] text-primary">Serverly Studio</div><h2 id="serverly-modal-title" className="mt-1 text-lg font-semibold">{modal === "channel" ? "Add a channel" : modal === "role" ? "Create a role" : modal === "category" ? "Create a category" : "Rename category"}</h2><p className="mt-1 text-sm text-muted-foreground">{modal === "channel" ? "Choose the channel type, location, and visibility." : modal === "role" ? "Define a reusable role for your community blueprint." : "Keep your server structure organized and easy to scan."}</p></div><Button type="button" variant="ghost" size="icon" aria-label="Close dialog" onClick={() => setModal(null)}><X className="size-4"/></Button></div>
+              <div className="space-y-4 p-5">
+                {modal === "channel" && <><div><label htmlFor="new-channel-name" className="mb-1.5 block text-sm font-medium">Channel name</label><Input id="new-channel-name" autoFocus maxLength={80} required value={channelDraft.name} onChange={(event) => setChannelDraft((current) => ({ ...current, name: event.target.value }))} placeholder="e.g. announcements"/></div><div><label className="mb-1.5 block text-sm font-medium" htmlFor="new-channel-type">Channel type</label><select id="new-channel-type" value={channelDraft.type} onChange={(event) => setChannelDraft((current) => ({ ...current, type: event.target.value as ChannelType, name: event.target.value === "voice" ? "New voice room" : "new-channel" }))} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"><option value="text">Text channel</option><option value="voice">Voice room</option></select></div><div><label className="mb-1.5 block text-sm font-medium" htmlFor="new-channel-category">Category</label><select id="new-channel-category" value={channelDraft.categoryId} onChange={(event) => setChannelDraft((current) => ({ ...current, categoryId: event.target.value }))} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm">{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div><label className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm"><input type="checkbox" checked={channelDraft.isPrivate} onChange={(event) => setChannelDraft((current) => ({ ...current, isPrivate: event.target.checked }))} className="size-4 accent-[var(--primary)]"/> Make this channel private</label></>}
+                {modal === "role" && <><div><label htmlFor="new-role-name" className="mb-1.5 block text-sm font-medium">Role name</label><Input id="new-role-name" autoFocus required maxLength={60} value={roleDraft.name} onChange={(event) => setRoleDraft((current) => ({ ...current, name: event.target.value }))} placeholder="e.g. Event Host"/></div><div><label htmlFor="new-role-description" className="mb-1.5 block text-sm font-medium">Description</label><Input id="new-role-description" maxLength={120} value={roleDraft.description} onChange={(event) => setRoleDraft((current) => ({ ...current, description: event.target.value }))} placeholder="What this role is for"/></div><div><label htmlFor="new-role-color" className="mb-1.5 block text-sm font-medium">Role color</label><div className="flex items-center gap-3"><input id="new-role-color" type="color" value={roleDraft.color} onChange={(event) => setRoleDraft((current) => ({ ...current, color: event.target.value }))} className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background p-1"/><span className="text-sm text-muted-foreground">{roleDraft.color.toUpperCase()}</span></div></div><fieldset><legend className="mb-2 text-sm font-medium">Permissions</legend><div className="grid grid-cols-2 gap-2">{["View channels", "Send messages", "Manage messages", "Kick members", "Manage channels", "Manage roles"].map((permission) => <label key={permission} className="flex items-center gap-2 rounded-lg border border-border p-2.5 text-xs"><input type="checkbox" checked={roleDraft.permissions.includes(permission)} onChange={(event) => setRoleDraft((current) => ({ ...current, permissions: event.target.checked ? [...current.permissions, permission] : current.permissions.filter((item) => item !== permission) }))} className="size-4 accent-[var(--primary)]"/>{permission}</label>)}</div></fieldset></>}
+                {(modal === "category" || modal === "rename-category") && <div><label htmlFor="category-name" className="mb-1.5 block text-sm font-medium">Category name</label><Input id="category-name" autoFocus required maxLength={60} value={categoryDraft.name} onChange={(event) => setCategoryDraft((current) => ({ ...current, name: event.target.value }))} placeholder="e.g. COMMUNITY"/></div>}
+              </div>
+              <div className="flex justify-end gap-2 border-t border-border p-5"><Button type="button" variant="outline" onClick={() => setModal(null)}>Cancel</Button><Button type="submit">{modal === "channel" ? "Add channel" : modal === "role" ? "Create role" : modal === "category" ? "Create category" : "Save changes"}</Button></div>
+            </form>
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
     </main>
   );
 }
@@ -371,7 +385,7 @@ function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
     <main className="min-h-screen overflow-x-clip bg-background text-foreground">
       <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 shadow-sm shadow-black/[0.03] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
-          <a href="#" className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_32px_var(--brand-glow)]"><LayoutGrid className="size-5"/></span><span className="text-[17px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></span></a>
+          <a href="#" className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground "><LayoutGrid className="size-5"/></span><span className="text-[17px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></span></a>
           <nav aria-label="Main navigation" className="hidden items-center gap-8 text-sm text-muted-foreground md:flex"><a href="#features" className="rounded-md py-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Features</a><a href="#workflow" className="rounded-md py-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">How it works</a><a href="#templates" className="rounded-md py-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Templates</a></nav>
           <Button onClick={onStart} className="rounded-xl px-4">Open studio <ArrowRight className="size-4"/></Button>
         </div>
@@ -380,7 +394,7 @@ function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
         <div className="landing-glow pointer-events-none absolute -left-48 top-0 h-[540px] w-[540px] rounded-full blur-3xl"/>
         <motion.div initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{duration:.6,ease:"easeOut"}} className="relative z-10">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3.5 py-1.5 text-xs font-medium text-primary"><Sparkles className="size-3.5"/> The visual workspace for Discord communities <ArrowRight className="size-3.5"/></div>
-          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] sm:text-6xl lg:text-[68px]">Build your corner of the internet<span className="text-primary">.</span></h1>
+          <motion.h1 initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.13, delayChildren: 0.12 } } }} className="max-w-2xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] sm:text-6xl lg:text-[68px]"><span className="block overflow-hidden"><motion.span className="block" variants={{ hidden: { y: "110%", opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } } }}>Build your corner</motion.span></span><span className="block overflow-hidden"><motion.span className="block" variants={{ hidden: { y: "110%", opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } } }}>of the internet<span className="text-primary">.</span></motion.span></span></motion.h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">Design a Discord server that feels like home. Shape channels, organize roles, and see your community take form before you launch.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button size="lg" onClick={onStart} className="h-12 rounded-xl px-5">Design your server <ArrowRight className="size-4"/></Button><Button size="lg" variant="outline" onClick={()=>document.getElementById("features")?.scrollIntoView({behavior:"smooth"})} className="h-12 rounded-xl px-5">Explore features <ChevronDown className="size-4"/></Button></div>
           <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground"><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> Visual-first builder</span><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> Starter templates</span><span className="flex items-center gap-2"><Check className="size-3.5 text-primary"/> No code required</span></div>
@@ -402,7 +416,7 @@ function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
       <section id="features" className="scroll-mt-24 border-y border-border/70 bg-card/40"><div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:grid-cols-3 sm:px-8">{[{icon:LayoutGrid,title:"Structure visually",desc:"Build a clean channel tree without getting lost in settings."},{icon:WandSparkles,title:"Start with a blueprint",desc:"Use community templates as a starting point, then make them yours."},{icon:ShieldCheck,title:"Plan access clearly",desc:"Keep channels and role ideas organized before you go live."}].map((item,i)=><motion.div key={item.title} initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.4}} transition={{delay:i*.08,duration:.45}} className="flex gap-4"><div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.08] text-primary"><item.icon className="size-5"/></div><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{item.desc}</p></div></motion.div>)}</div></section>
       <section id="workflow" className="scroll-mt-24 mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24"><div className="mx-auto max-w-2xl text-center"><Badge variant="subtle">A calmer way to build</Badge><h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">From blank canvas to community-ready.</h2><p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">See the structure, adjust the details, and iterate before you invite the first member.</p></div><div className="mt-12 grid gap-4 md:grid-cols-3">{[{n:"01",title:"Choose your starting point",desc:"Pick a template or start with a blank structure."},{n:"02",title:"Shape the experience",desc:"Add channels, organize categories, and tune access ideas."},{n:"03",title:"Review your blueprint",desc:"Check the layout before planning your launch."}].map((step,i)=><motion.div key={step.n} initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.3}} transition={{delay:i*.1,duration:.45}} className="rounded-2xl border border-border bg-card/70 p-6"><div className="text-xs font-semibold tracking-[.15em] text-primary">{step.n} / WORKFLOW</div><h3 className="mt-5 text-lg font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.desc}</p></motion.div>)}</div></section>
       <section id="templates" className="scroll-mt-24 mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:pb-24"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><div className="text-xs font-semibold uppercase tracking-[.16em] text-primary">Starter templates</div><h2 className="mt-3 text-3xl font-semibold tracking-tight">A strong foundation, already mapped.</h2></div><Button variant="outline" onClick={() => { document.getElementById("templates")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Browse templates <ArrowRight className="size-4"/></Button></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{presets.map((preset,i)=>{const Icon=preset.icon;return <motion.button type="button" key={preset.id} whileHover={{y:-4}} whileTap={{scale:.99}} onClick={() => onStart(preset.id)} aria-label={`Start designing with the ${preset.name} template`} className="group w-full cursor-pointer rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"><div className="flex size-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/[0.08] text-primary"><Icon className="size-5"/></div><h3 className="mt-5 text-sm font-semibold">{preset.name}</h3><p className="mt-2 min-h-[60px] text-xs leading-5 text-muted-foreground">{preset.description}</p><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>Template 0{i+1}</span><ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1"/></div></motion.button>})}</div></section>
-      <section className="px-5 pb-20 sm:px-8"><div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-primary/20 bg-card px-6 py-12 text-center sm:px-12 sm:py-16"><div className="landing-glow pointer-events-none absolute inset-0 opacity-50"/><div className="relative"><div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-6"/></div><h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">Your community starts with a better blueprint.</h2><p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">A workspace designed to make server planning clear, visual, and enjoyable.</p><Button size="lg" onClick={onStart} className="mt-7 h-12 rounded-xl px-5">Open Serverly Studio <ArrowRight className="size-4"/></Button></div></div></section>
+      <section className="px-5 pb-20 sm:px-8"><div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-primary/20 bg-card px-6 py-12 text-center sm:px-12 sm:py-16"><div className="relative"><div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-6"/></div><h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">Your community starts with a better blueprint.</h2><p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">A workspace designed to make server planning clear, visual, and enjoyable.</p><Button size="lg" onClick={onStart} className="mt-7 h-12 rounded-xl px-5">Open Serverly Studio <ArrowRight className="size-4"/></Button></div></div></section>
       <footer className="border-t border-border/70 px-5 py-7 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-muted-foreground sm:flex-row"><span className="font-medium text-foreground">serverly OS</span><span>Designed for the communities you want to create.</span><span>Visual prototype · Discord connection coming later</span></div></footer>
     </main>
   );
@@ -411,6 +425,7 @@ function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
 export default function Home() {
   const [showDesigner, setShowDesigner] = useState(false);
   const [initialPreset, setInitialPreset] = useState("developer");
+  useEffect(() => { if (showDesigner) { window.history.replaceState(null, "", window.location.pathname); window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); } }, [showDesigner]);
   if (showDesigner) return <><div className="sticky top-0 z-50 flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2.5 backdrop-blur-xl"><Button variant="ghost" size="sm" onClick={() => setShowDesigner(false)}><ArrowLeft className="size-4"/> Back to home</Button><span className="hidden text-xs text-muted-foreground sm:inline">Serverly Studio · Preview only</span><span className="w-0 sm:w-[100px]"/></div><Designer key={initialPreset} initialPreset={initialPreset}/></>;
   return <LandingPage onStart={(presetId) => { if (presetId) setInitialPreset(presetId); setShowDesigner(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} />;
 }
