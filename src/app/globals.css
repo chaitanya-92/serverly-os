@@ -2,26 +2,71 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Serverly OS — Obsidian Luxe design tokens.
+   Light is the default; .dark switches every semantic surface. */
 :root {
-  --background: #0b0c10;
-  --foreground: #f4f4f7;
-  --card: #111319;
-  --card-foreground: #f4f4f7;
-  --popover: #151720;
-  --popover-foreground: #f4f4f7;
-  --primary: #8b7cff;
-  --primary-foreground: #ffffff;
-  --secondary: #1b1d27;
-  --secondary-foreground: #e7e7ee;
-  --muted: #1a1c25;
-  --muted-foreground: #9396a8;
-  --accent: #252236;
-  --accent-foreground: #e9e5ff;
-  --destructive: #ef6464;
-  --border: #282a35;
-  --input: #282a35;
-  --ring: #8b7cff;
+  color-scheme: light;
+  --background: #f5f3ef;
+  --foreground: #25221f;
+  --card: #fffdfa;
+  --card-foreground: #25221f;
+  --popover: #fffdfa;
+  --popover-foreground: #25221f;
+  --primary: #9b7448;
+  --primary-foreground: #fffdf9;
+  --secondary: #eee9e1;
+  --secondary-foreground: #37312a;
+  --muted: #eee9e1;
+  --muted-foreground: #81786d;
+  --accent: #e9e0d3;
+  --accent-foreground: #3e3022;
+  --destructive: #c84c45;
+  --border: #e2dbd0;
+  --input: #ded6ca;
+  --ring: #b28b5c;
   --radius: 0.75rem;
+  --app-header: rgb(255 253 250 / 92%);
+  --discord-sidebar: #f0ece5;
+  --discord-main: #faf8f4;
+  --discord-active: #e5ddd1;
+  --discord-hover: #eae4da;
+  --discord-text: #37332e;
+  --discord-muted: #82796e;
+  --discord-border: #e1d9cd;
+  --discord-message: #f0ece5;
+  --brand-glow: rgb(155 116 72 / 12%);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #12110f;
+  --foreground: #f2eee8;
+  --card: #1b1916;
+  --card-foreground: #f2eee8;
+  --popover: #211e1a;
+  --popover-foreground: #f2eee8;
+  --primary: #c49a6c;
+  --primary-foreground: #17130f;
+  --secondary: #29251f;
+  --secondary-foreground: #eee5d9;
+  --muted: #24211d;
+  --muted-foreground: #a49a8d;
+  --accent: #332a20;
+  --accent-foreground: #f2e3d0;
+  --destructive: #ef7770;
+  --border: #393229;
+  --input: #393229;
+  --ring: #c49a6c;
+  --app-header: rgb(18 17 15 / 92%);
+  --discord-sidebar: #171613;
+  --discord-main: #1d1b18;
+  --discord-active: #393127;
+  --discord-hover: #29251f;
+  --discord-text: #eee8df;
+  --discord-muted: #a39a8e;
+  --discord-border: #332e27;
+  --discord-message: #151411;
+  --brand-glow: rgb(196 154 108 / 15%);
 }
 
 @theme inline {
@@ -57,6 +102,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 180ms ease, color 180ms ease;
 }
-::selection { background: #8b7cff55; }
+::selection { background: var(--brand-glow); }
 button, input { font: inherit; }
