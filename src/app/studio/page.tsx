@@ -399,7 +399,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </div>
             </div>
           </Card>
-          {notice && <div key={notice} role="status" aria-live="polite" className="fixed right-4 top-4 z-[120] w-[min(380px,calc(100vw-2rem))] overflow-hidden border border-border bg-card px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)]"><div className="flex items-start gap-3"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center bg-primary/15 text-primary"><Check className="size-3.5" /></span><span className="min-w-0 flex-1 leading-relaxed">{notice}</span></div><span aria-hidden="true" className="absolute bottom-0 left-0 h-0.5 w-full origin-left bg-primary" style={{ animation: "serverly-toast-timeline 3s linear forwards" }} /></div>}
+          {notice && <div key={notice} role="status" aria-live="polite" className="serverly-timed-toast fixed right-4 top-20 z-[120] w-[min(380px,calc(100vw-2rem))] overflow-hidden border border-border bg-card px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)]"><div className="flex items-start gap-3"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center bg-primary/15 text-primary"><Check className="size-3.5" /></span><span className="min-w-0 flex-1 leading-relaxed">{notice}</span></div><svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none"><rect className="serverly-toast-border-timer" x="0.75" y="0.75" width="98.5" height="98.5" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" /></svg></div>}
           </>}
 
         </section>
