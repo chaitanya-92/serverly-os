@@ -71,6 +71,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [roleDraft, setRoleDraft] = useState({ name: "", description: "", color: "#D9A441", permissions: ["View channels", "Send messages"] });
   const [roles, setRoles] = useState<ServerRole[]>([{ id: "owner", name: "Owner", description: "Full server access", color: "#D9A441", permissions: ["Manage server", "Manage channels", "Manage roles", "View channels", "Send messages"] }, { id: "moderator", name: "Moderator", description: "Manage community", color: "#D9A441", permissions: ["Manage messages", "Kick members", "View channels", "Send messages"] }, { id: "member", name: "Member", description: "Standard access", color: "#D9A441", permissions: ["View channels", "Send messages"] }]);
   const [notice, setNotice] = useState("");
+  useEffect(() => { if (!notice) return; const timeout = window.setTimeout(() => setNotice(""), 3000); return () => window.clearTimeout(timeout); }, [notice]);
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
   const [isRestored, setIsRestored] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -398,7 +399,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </div>
             </div>
           </Card>
-          {notice && <div role="status" aria-live="polite" className="fixed bottom-5 right-5 z-[120] flex w-[min(380px,calc(100vw-2rem))] items-start gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-xl"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary"><Check className="size-3.5" /></span><span className="min-w-0 flex-1 leading-relaxed">{notice}</span><Button variant="ghost" size="icon" className="-mr-1 -mt-1 size-7 shrink-0 text-muted-foreground" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-3.5" /></Button></div>}
+          {notice && <div key={notice} role="status" aria-live="polite" className="fixed right-4 top-4 z-[120] w-[min(380px,calc(100vw-2rem))] overflow-hidden border border-border bg-card px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)]"><div className="flex items-start gap-3"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center bg-primary/15 text-primary"><Check className="size-3.5" /></span><span className="min-w-0 flex-1 leading-relaxed">{notice}</span></div><span aria-hidden="true" className="absolute bottom-0 left-0 h-0.5 w-full origin-left bg-primary" style={{ animation: "serverly-toast-timeline 3s linear forwards" }} /></div>}
           </>}
 
         </section>
