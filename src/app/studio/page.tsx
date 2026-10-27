@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight, LoaderCircle,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
-  MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
+  MessageCircle, MoreHorizontal, PanelLeft, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
   Volume2, X, Zap, Download, Save, Upload,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -274,22 +274,20 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
       <div className={`mx-auto grid max-w-[1800px] grid-cols-1 gap-4 p-4 lg:p-5 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-6`}>
         <aside className={`space-y-4 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start ${sidebarCollapsed ? "xl:overflow-visible" : "xl:overflow-y-auto xl:overscroll-contain"} xl:pr-1`}>
-          <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div><Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><MoreHorizontal className="size-4" /></Button></div>
+          <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div><Button variant="ghost" size="icon" className="size-8 shrink-0 text-muted-foreground" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><PanelLeft className="size-4" /></Button></div>
           <nav className="space-y-1">
             <Button variant="ghost" title="Server designer" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0 text-primary" />{!sidebarCollapsed && "Server designer"}</Button>
             <Button variant="ghost" title="AI architect" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4 shrink-0" />{!sidebarCollapsed && "AI architect"}</Button>
             <Button variant="ghost" title="Template library" onClick={() => { setWorkspaceTab("templates"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0" />{!sidebarCollapsed && "Template library"}</Button>
           </nav>
-          <Separator />
-          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Quick start</div><span className="text-xs text-muted-foreground">04</span></div>
-          <div className="space-y-2">
+          {!sidebarCollapsed && <><Separator /><div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Quick start</div><span className="text-xs text-muted-foreground">{String(presets.length).padStart(2, "0")}</span></div></> }
+          <div className="space-y-1.5">
             {presets.map((preset) => {
               const Icon = preset.icon;
               const isActive = selectedPreset === preset.id;
-              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex h-auto min-h-0 w-full items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${isActive ? "border-primary/50 bg-primary/[0.08] " : "border-transparent hover:border-border hover:bg-card"}`}>
+              return <Button variant="ghost" key={preset.id} title={preset.name} aria-label={preset.name} onClick={() => choosePreset(preset.id)} className={`group flex h-auto min-h-0 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${isActive ? "border-primary/50 bg-primary/[0.08] " : "border-transparent hover:border-border hover:bg-card"}`}>
                 <div className={`flex size-8 shrink-0 items-center justify-center rounded-md ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
-                <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div></div>
-                {isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}
+                {!sidebarCollapsed && <><div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div></div>{isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}</>}
               </Button>;
             })}
           </div>
