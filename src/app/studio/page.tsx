@@ -281,8 +281,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             <CardContent className="p-4">
               <div className="mb-2 flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><WandSparkles className="size-4" /></div>
               <div className="text-sm font-semibold">Have an idea?</div>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let AI draft the perfect structure.</p>
-              <Button variant="outline" size="sm" className="mt-3 w-full border-primary/25 bg-background/40" onClick={() => setWorkspaceTab("ai"); setNotice("")}>Try AI architect <ArrowRight className="size-3.5" /></Button>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community to start from a tailored blueprint.</p>
+              <Button variant="outline" size="sm" className="mt-3 w-full border-primary/25 bg-background/40" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }}>Try AI architect <ArrowRight className="size-3.5" /></Button>
             </CardContent>
           </Card>
         </aside>
