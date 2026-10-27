@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       .from(accounts)
       .where(and(eq(accounts.userId, session.user.id), eq(accounts.provider, "discord")))
       .limit(1);
-    if (!account?.accessToken || !account.scope?.split(" ").includes("guilds")) {
+    if (!account?.accessToken) {
       return NextResponse.json({ error: "Reconnect Discord and grant server-list access first." }, { status: 403 });
     }
     const response = await fetch("https://discord.com/api/users/@me/guilds?limit=200", {
