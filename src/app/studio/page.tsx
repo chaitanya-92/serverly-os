@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
+  ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
   Volume2, X, Zap, Download, Save, Upload,
@@ -47,6 +47,10 @@ const presets = [
   { id: "gaming", name: "Gaming Community", description: "Squads, game nights, voice lobbies, and LFG.", icon: Gamepad2, members: "1k+", color: "blue" },
   { id: "creator", name: "Creator Club", description: "A home for fans, updates, and creative feedback.", icon: Sparkles, members: "250+", color: "pink" },
   { id: "study", name: "Study Group", description: "Study rooms, accountability, and shared resources.", icon: Crown, members: "100+", color: "amber" },
+  { id: "support", name: "Support Community", description: "Help desk, FAQs, tickets and trusted moderators.", icon: ShieldCheck, members: "300+", color: "green" },
+  { id: "book-club", name: "Book Club", description: "Reading sprints, reviews, genres and monthly picks.", icon: LayoutGrid, members: "150+", color: "rose" },
+  { id: "fitness", name: "Fitness Crew", description: "Workout accountability, progress and group coaching.", icon: AudioLines, members: "200+", color: "blue" },
+  { id: "startup", name: "Startup Network", description: "Founder discussions, feedback, launches and networking.", icon: Command, members: "400+", color: "amber" },
 ];
 
 function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
@@ -58,6 +62,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [workspaceTab, setWorkspaceTab] = useState<"designer" | "ai" | "templates">("designer");
   const [search, setSearch] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
   const [channelDraft, setChannelDraft] = useState({ name: "new-channel", type: "text" as ChannelType, categoryId: "welcome", isPrivate: false });
   const [categoryDraft, setCategoryDraft] = useState({ name: "NEW CATEGORY", categoryId: "" });
@@ -242,27 +247,25 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     <main className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white "><LayoutGrid className="size-5" /></div>
-          <div className="leading-tight"><div className="text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></div><div className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</div></div>
+          <button type="button" onClick={() => window.location.assign("/")} aria-label="Serverly OS home" className="flex items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-5" /></span><span className="leading-tight"><span className="block text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></span><span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</span></span></button>
           <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
           <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">{serverName || "Untitled server"}</span></div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => window.location.assign("/")} className="hidden text-muted-foreground sm:inline-flex"><ArrowLeft className="size-4" /> Home</Button>
-          <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" aria-label="Back to home" onClick={() => window.location.assign("/")}><ArrowLeft className="size-4" /></Button>
+          <span className="hidden text-xs text-muted-foreground lg:inline">{lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Saving locally…"}</span>
           <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
           <Button variant="outline" className="hidden sm:inline-flex" onClick={saveDraft} disabled={!isRestored}><Save className="size-4" /> Save draft</Button>
           <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 p-4 md:p-6 xl:grid-cols-[230px_minmax(0,1fr)_280px] xl:gap-5 xl:p-6 2xl:grid-cols-[250px_minmax(0,1fr)_292px] 2xl:gap-6 2xl:p-8">
-        <aside className="space-y-5 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
-          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
+      <div className={`mx-auto grid max-w-[1800px] grid-cols-1 gap-4 p-4 lg:p-5 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-6">
+        <aside className={`space-y-4 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start ${sidebarCollapsed ? "xl:overflow-visible" : "xl:overflow-y-auto xl:overscroll-contain"} xl:pr-1`}>
+          <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div><Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><MoreHorizontal className="size-4" /></Button></div>
           <nav className="space-y-1">
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 text-primary" /> Server designer </Button>
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4" /> AI architect</Button>
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("templates"); setNotice(""); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4" /> Template library</Button>
+            <Button variant="ghost" title="Server designer" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0 text-primary" />{!sidebarCollapsed && "Server designer"}</Button>
+            <Button variant="ghost" title="AI architect" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4 shrink-0" />{!sidebarCollapsed && "AI architect"}</Button>
+            <Button variant="ghost" title="Template library" onClick={() => { setWorkspaceTab("templates"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0" />{!sidebarCollapsed && "Template library"}</Button>
           </nav>
           <Separator />
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Quick start</div><span className="text-xs text-muted-foreground">04</span></div>
@@ -301,7 +304,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           {workspaceTab === "designer" && <>
 
           <div className="space-y-4">
-            <div><div className="mb-2 flex flex-wrap items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Auto-saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Saving changes locally…"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
+            <div><div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">{lastSavedAt ? `Auto-saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Saving changes locally…"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
             <div className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto rounded-xl border border-border bg-card p-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" className="shrink-0" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={() => setModal("reset")}><ArrowDown className="size-3.5" /> Reset</Button><span className="mx-1 h-6 w-px shrink-0 bg-border" /><Button size="sm" className="shrink-0" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
           </div>
 
@@ -363,10 +366,10 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
         </section>
 
-        <aside id="inspector" className="space-y-4 xl:sticky xl:top-[136px] xl:max-h-[calc(100vh-152px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
-          <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-2 text-lg font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Tune your server identity and selected channel.</p></div>
+        <aside id="inspector" className="space-y-2 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-92px)] xl:self-start xl:overflow-hidden xl:pr-0">
+          <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-1 text-base font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Server identity and channel settings.</p></div>
           <Card>
-            <CardContent className="space-y-4 p-4">
+            <CardContent className="space-y-2.5 p-3">
               <div><label htmlFor="server-name" className="mb-2 block text-xs font-medium text-muted-foreground">Server name</label><Input id="server-name" value={serverName} onChange={(event) => setServerName(event.target.value)} className="h-9" /></div>
               <div><label htmlFor="server-category" className="mb-2 block text-xs font-medium text-muted-foreground">Server category</label><div className="relative"><select id="server-category" value={selectedPreset} onChange={(event) => choosePreset(event.target.value)} className="h-10 w-full appearance-none rounded-lg border border-input bg-background pl-3 pr-9 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">{presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div></div>
               <div><label className="mb-2 block text-xs font-medium text-muted-foreground">Visibility</label><div className="grid grid-cols-2 gap-2"><Button type="button" variant="ghost" aria-pressed={visibility === "public"} onClick={() => { setVisibility("public"); setNotice("Blueprint visibility set to public."); }} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs font-medium ${visibility === "public" ? "border-primary/50 bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><MessageCircle className="size-3.5" /> Public</Button><Button type="button" variant="ghost" aria-pressed={visibility === "private"} onClick={() => { setVisibility("private"); setNotice("Blueprint visibility set to private."); }} className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-xs font-medium ${visibility === "private" ? "border-primary/50 bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary"}`}><LockKeyhole className="size-3.5" /> Private</Button></div><p className="mt-1.5 text-[11px] text-muted-foreground">{visibility === "public" ? "Anyone can discover this planned community." : "Plan this server as invite-only."}</p></div>
@@ -394,7 +397,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               <div className="mt-3 space-y-2.5 text-xs"><div className="flex items-center gap-2 text-muted-foreground"><Check className="size-3.5 text-emerald-400" /> Channel structure <span className="ml-auto text-emerald-300">Ready</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Permissions audit <span className="ml-auto text-amber-200">Pending</span></div><div className="flex items-center gap-2 text-muted-foreground"><ArrowRight className="size-3.5 text-amber-300" /> Discord connection <span className="ml-auto text-amber-200">Not linked</span></div></div>
             </CardContent>
           </Card>
-          <div className="flex items-center justify-center gap-2 py-1 text-[10px] text-muted-foreground"><Command className="size-3" /> Built for communities, by Serverly OS</div>
+          
         </aside>
       </div>
       <AnimatePresence>
