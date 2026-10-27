@@ -270,9 +270,9 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             {presets.map((preset) => {
               const Icon = preset.icon;
               const isActive = selectedPreset === preset.id;
-              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] " : "border-transparent hover:border-border hover:bg-card"}`}>
-                <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
-                <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div><div className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{preset.description}</div></div>
+              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex h-auto min-h-0 w-full items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${isActive ? "border-primary/50 bg-primary/[0.08] " : "border-transparent hover:border-border hover:bg-card"}`}>
+                <div className={`flex size-8 shrink-0 items-center justify-center rounded-md ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
+                <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div></div>
                 {isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}
               </Button>;
             })}
