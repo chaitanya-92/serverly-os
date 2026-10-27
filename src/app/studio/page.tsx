@@ -193,8 +193,9 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     } else {
       setCategories(starterCategories);
     }
-    const nextSelection = (id === "gaming" ? "general" : id === "creator" ? "chat" : id === "study" ? "study-chat" : "general");
+    const nextSelection = "general";
     setSelectedChannel(nextSelection);
+    setWorkspaceTab("designer");
     setNotice(preset ? `${preset.name} template loaded` : "Template loaded");
   }
 
@@ -258,12 +259,12 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         <aside className="space-y-5 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
           <nav className="space-y-1">
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("ai"); setNotice("AI Architect preview: choose a template first, then refine the generated blueprint. Prompt-based generation is coming next."); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4" /> AI architect</Button>
-            <Button variant="ghost" onClick={() => { setWorkspaceTab("templates"); setNotice("Template library selected. Choose a template below to load its structure into the editor."); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4" /> Template library</Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 text-primary" /> Server designer </Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4" /> AI architect</Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("templates"); setNotice(""); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4" /> Template library</Button>
           </nav>
           <Separator />
-          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Templates</div><span className="text-xs text-muted-foreground">04</span></div>
+          <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Quick start</div><span className="text-xs text-muted-foreground">04</span></div>
           <div className="space-y-2">
             {presets.map((preset) => {
               const Icon = preset.icon;
@@ -280,7 +281,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               <div className="mb-2 flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><WandSparkles className="size-4" /></div>
               <div className="text-sm font-semibold">Have an idea?</div>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Describe your community and let AI draft the perfect structure.</p>
-              <Button variant="outline" size="sm" className="mt-3 w-full border-primary/25 bg-background/40" onClick={() => setNotice("AI architect is planned for the next build phase.")}>Try AI architect <ArrowRight className="size-3.5" /></Button>
+              <Button variant="outline" size="sm" className="mt-3 w-full border-primary/25 bg-background/40" onClick={() => setWorkspaceTab("ai"); setNotice("")}>Try AI architect <ArrowRight className="size-3.5" /></Button>
             </CardContent>
           </Card>
         </aside>
