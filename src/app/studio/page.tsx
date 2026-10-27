@@ -316,7 +316,30 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           </motion.div>}
           {workspaceTab === "templates" && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
             <div><Badge variant="subtle">TEMPLATE LIBRARY</Badge><h1 className="mt-3 text-3xl font-semibold">A better starting point<span className="text-primary">.</span></h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Load a blueprint, then customize its categories, channels and access.</p></div>
-            <div className="grid gap-3 sm:grid-cols-2">{presets.map((preset, index) => { const Icon = preset.icon; return <Card key={preset.id}><CardContent className="flex h-full flex-col p-5"><div className="flex items-center justify-between"><span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary"><Icon className="size-5" /></span><Badge variant="outline">0{index + 1}</Badge></div><h2 className="mt-4 font-semibold">{preset.name}</h2><p className="mt-2 min-h-10 text-sm text-muted-foreground">{preset.description}</p><Button className="mt-5 w-full" variant={selectedPreset === preset.id ? "default" : "outline"} onClick={() => { choosePreset(preset.id); setWorkspaceTab("designer"); }}>Use this template <ArrowRight className="size-4" /></Button></CardContent></Card>; })}</div>
+          <div className="h-[calc(100dvh-250px)] min-h-[420px] overflow-y-auto overscroll-contain pr-1 pb-8 [scrollbar-width:thin]">
+            <motion.div className="grid gap-4 pb-2 sm:grid-cols-2" initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.085, delayChildren: 0.04 } } }}>
+              {presets.map((preset, index) => {
+                const Icon = preset.icon;
+                const isSelected = selectedPreset === preset.id;
+                return <motion.div key={preset.id} variants={{ hidden: { opacity: 0, y: 18, scale: 0.985 }, visible: { opacity: 1, y: 0, scale: 1 } }} transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }} whileHover={{ y: -3, transition: { duration: 0.18 } }} className="h-full">
+                  <Card className={isSelected ? "group relative h-full overflow-hidden border border-primary/45 bg-card shadow-[0_0_0_1px_rgba(234,191,36,0.07)]" : "group relative h-full overflow-hidden border border-border/80 bg-card/80 transition-colors duration-300 hover:border-primary/30 hover:bg-card"}>
+                    <div className={isSelected ? "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" : "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"} />
+                    <CardContent className="flex h-full min-h-[214px] flex-col p-5">
+                      <div className="flex items-start justify-between">
+                        <span className={isSelected ? "flex size-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary" : "flex size-11 items-center justify-center rounded-xl border border-border/70 bg-secondary/80 text-primary transition-colors duration-300 group-hover:border-primary/25 group-hover:bg-primary/10"}><Icon className="size-[19px]" /></span>
+                        <Badge variant="outline" className="rounded-md border-border/80 bg-background/70 px-2 font-mono text-[10px] tracking-wide text-muted-foreground">{String(index + 1).padStart(2, "0")}</Badge>
+                      </div>
+                      <h2 className="mt-5 text-[15px] font-semibold tracking-tight">{preset.name}</h2>
+                      <p className="mt-2 min-h-10 text-[13px] leading-5 text-muted-foreground">{preset.description}</p>
+                      <div className="mt-auto pt-5">
+                        <Button className="group/button h-10 w-full justify-between rounded-lg px-3.5 text-xs font-medium transition-all duration-200 hover:shadow-sm" variant={isSelected ? "default" : "outline"} onClick={() => { choosePreset(preset.id); setWorkspaceTab("designer"); }}><span>Use this template</span><ArrowRight className="size-3.5 transition-transform duration-200 group-hover/button:translate-x-0.5" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>;
+              })}
+            </motion.div>
+          </div>
           </motion.div>}
           {workspaceTab === "designer" && <>
 
