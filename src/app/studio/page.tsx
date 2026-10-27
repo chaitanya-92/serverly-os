@@ -65,6 +65,13 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [search, setSearch] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarHint, setSidebarHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!sidebarHint) return;
+    const timeout = window.setTimeout(() => setSidebarHint(null), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [sidebarHint]);
   const [modal, setModal] = useState<ModalState>(null);
   const [channelDraft, setChannelDraft] = useState({ name: "new-channel", type: "text" as ChannelType, categoryId: "welcome", isPrivate: false });
   const [categoryDraft, setCategoryDraft] = useState({ name: "NEW CATEGORY", categoryId: "" });
@@ -270,8 +277,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const voiceCount = categories.reduce((count, category) => count + category.channels.filter((channel) => channel.type === "voice").length, 0);
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
+    <main className="h-dvh overflow-hidden bg-background text-foreground">
+      <header className="relative z-30 flex h-[68px] shrink-0 items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
         <div className="flex items-center gap-3">
           <button type="button" onClick={() => window.location.assign("/")} aria-label="Serverly OS home" className="flex items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LayoutGrid className="size-5" /></span><span className="leading-tight"><span className="block text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></span><span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</span></span></button>
           <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
@@ -285,16 +292,18 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         </div>
       </header>
 
-      <div className={`mx-auto grid max-w-[1800px] grid-cols-1 gap-4 p-4 lg:p-5 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-6`}>
-        <aside className={`relative space-y-4 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start ${sidebarCollapsed ? "xl:overflow-visible" : "xl:overflow-y-auto xl:overscroll-contain"} xl:pr-1`}>
-          <Button variant="outline" size="icon" className="absolute -right-3 top-1/2 z-30 hidden size-8 -translate-y-1/2 rounded-sm border border-border bg-secondary text-foreground shadow-lg transition-all duration-200 hover:border-primary hover:bg-accent hover:text-primary xl:inline-flex" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><PanelLeft className={`size-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`} /></Button><div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div></div>
+      <div className={`mx-auto grid h-[calc(100dvh-68px)] min-h-0 max-w-[1800px] grid-cols-1 gap-4 overflow-hidden p-3 lg:p-4 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-5`}>
+        <div className="relative min-w-0">
+          <Button variant="outline" size="icon" className="absolute -right-3 top-0 z-40 hidden size-7 rounded-sm border border-border bg-card text-muted-foreground shadow-md transition-all duration-200 hover:border-primary hover:bg-accent hover:text-primary xl:inline-flex" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => { setSidebarHint(null); setSidebarCollapsed((value) => !value); }}><PanelLeft className={`size-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`} /></Button>
+        <aside className={`flex min-w-0 flex-col gap-4 xl:sticky xl:top-0 xl:h-full xl:min-h-0 xl:self-start ${sidebarCollapsed ? "overflow-visible" : "overflow-y-auto overscroll-contain"} xl:pr-1`}>
+          <div className={`flex min-h-7 items-center ${sidebarCollapsed ? "justify-center" : "justify-between pr-3"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div></div>
           <nav className="space-y-1">
-            <Button variant="ghost" title="Server designer" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0 text-primary" />{!sidebarCollapsed && "Server designer"}</Button>
-            <Button variant="ghost" title="AI architect" onClick={() => { setWorkspaceTab("ai"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4 shrink-0" />{!sidebarCollapsed && "AI architect"}</Button>
-            <Button variant="ghost" title="Template library" onClick={() => { setWorkspaceTab("templates"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0" />{!sidebarCollapsed && "Template library"}</Button>
+            <Button variant="ghost" title={sidebarCollapsed ? undefined : "Server designer"} onMouseEnter={() => sidebarCollapsed && setSidebarHint("Server designer")} onMouseLeave={() => setSidebarHint(null)} onFocus={() => sidebarCollapsed && setSidebarHint("Server designer")} onBlur={() => setSidebarHint(null)} onClick={() => { setSidebarHint(null); setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0 text-primary" />{!sidebarCollapsed && "Server designer"}</Button>
+            <Button variant="ghost" title={sidebarCollapsed ? undefined : "AI architect"} onMouseEnter={() => sidebarCollapsed && setSidebarHint("AI architect")} onMouseLeave={() => setSidebarHint(null)} onFocus={() => sidebarCollapsed && setSidebarHint("AI architect")} onBlur={() => setSidebarHint(null)} onClick={() => { setSidebarHint(null); setWorkspaceTab("ai"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4 shrink-0" />{!sidebarCollapsed && "AI architect"}</Button>
+            <Button variant="ghost" title={sidebarCollapsed ? undefined : "Template library"} onMouseEnter={() => sidebarCollapsed && setSidebarHint("Template library")} onMouseLeave={() => setSidebarHint(null)} onFocus={() => sidebarCollapsed && setSidebarHint("Template library")} onBlur={() => setSidebarHint(null)} onClick={() => { setSidebarHint(null); setWorkspaceTab("templates"); setNotice(""); }} className={`flex h-10 w-full ${sidebarCollapsed ? "justify-center px-0" : "justify-start"} items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 shrink-0" />{!sidebarCollapsed && "Template library"}</Button>
           </nav>
           {!sidebarCollapsed && <><Separator /><div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Quick start</div><span className="text-xs text-muted-foreground">{String(Math.min(4, presets.length)).padStart(2, "0")}</span></div></> }
-          <div className="space-y-1.5">
+          {!sidebarCollapsed && <div className="space-y-1.5">
             {presets.slice(0, 4).map((preset) => {
               const Icon = preset.icon;
               const isActive = selectedPreset === preset.id;
@@ -303,11 +312,14 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                 {!sidebarCollapsed && <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div></div>}
               </Button>;
             })}
-          </div>
+          </div>}
 
         </aside>
+        </div>
 
-        <section className="min-w-0 space-y-3 xl:flex xl:h-[calc(100dvh-112px)] xl:min-h-0 xl:flex-col xl:overflow-hidden">
+        {sidebarHint && sidebarCollapsed && <AnimatePresence><motion.div key={sidebarHint} initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} role="status" className="fixed right-4 top-[76px] z-[120] flex max-w-[min(320px,calc(100vw-2rem))] items-center gap-3 border border-border bg-card px-3 py-2.5 text-sm text-foreground shadow-xl"><span className="size-1.5 shrink-0 bg-primary" /><span className="font-medium">{sidebarHint}</span><span className="text-xs text-muted-foreground">Navigation</span><button type="button" aria-label="Dismiss tooltip" onClick={() => setSidebarHint(null)} className="ml-1 flex size-6 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"><X className="size-3.5" /></button></motion.div></AnimatePresence>}
+
+        <section className="min-w-0 space-y-3 xl:flex xl:h-full xl:min-h-0 xl:flex-col xl:overflow-hidden">
 
           {workspaceTab === "ai" && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
             <div><Badge variant="subtle">BLUEPRINT ARCHITECT</Badge><h1 className="mt-3 text-3xl font-semibold">Describe your community<span className="text-primary">.</span></h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Create an editable starter structure from your community brief.</p></div>
@@ -402,7 +414,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
         </section>
 
-        <aside id="inspector" className="space-y-2 xl:sticky xl:top-0 xl:max-h-[calc(100dvh-140px)] xl:min-h-0 xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
+        <aside id="inspector" className="min-w-0 space-y-2 overflow-y-auto overscroll-contain xl:sticky xl:top-0 xl:h-full xl:min-h-0 xl:self-start xl:pr-1">
           <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-1 text-base font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Server identity and channel settings.</p></div>
           <Card>
             <CardContent className="space-y-2.5 p-3">
