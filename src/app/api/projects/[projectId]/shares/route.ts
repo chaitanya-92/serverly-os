@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { and, desc, eq, isNull, or, gt } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/../auth";
 import { requireDb } from "@/db";
