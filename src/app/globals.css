@@ -9,14 +9,14 @@
   --background: #0b0a10;
   --foreground: #f4f2fa;
   --card: #111019;
-  --card-foreground: #25221f;
-  --popover: #fffdfa;
-  --popover-foreground: #25221f;
+  --card-foreground: #f4f2fa;
+  --popover: #111019;
+  --popover-foreground: #f4f2fa;
   --primary: #8b7cff;
   --primary-foreground: #ffffff;
   --secondary: #1b1926;
   --secondary-foreground: #e9e6f3;
-  --muted: #eee9e1;
+  --muted: #1b1926;
   --muted-foreground: #9995ad;
   --accent: #29233e;
   --accent-foreground: #eee9ff;
@@ -33,7 +33,7 @@
   --discord-text: #f4f2fa;
   --discord-muted: #9995ad;
   --discord-border: #292637;
-  --discord-message: #f0ece5;
+  --discord-message: #14121d;
   --brand-glow: rgb(139 124 255 / 14%);
 }
 
@@ -55,13 +55,13 @@
   --accent-foreground: #eee9ff;
   --destructive: #ef6464;
   --border: #292637;
-  --input: #393229;
+  --input: #292637;
   --ring: #c49a6c;
   --app-header: rgb(11 10 16 / 92%);
   --discord-sidebar: #0e0d13;
   --discord-main: #111019;
   --discord-active: #2b2540;
-  --discord-hover: #29251f;
+  --discord-hover: #1b1926;
   --discord-text: #eee8df;
   --discord-muted: #9995ad;
   --discord-border: #332e27;
@@ -114,3 +114,7 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+.landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
