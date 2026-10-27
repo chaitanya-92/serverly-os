@@ -6,17 +6,50 @@
    Light is the default; .dark switches every semantic surface. */
 :root {
   color-scheme: light;
+  --background: #f7f6fb;
+  --foreground: #1d1b27;
+  --card: #ffffff;
+  --card-foreground: #1d1b27;
+  --popover: #ffffff;
+  --popover-foreground: #1d1b27;
+  --primary: #6d5ce8;
+  --primary-foreground: #ffffff;
+  --secondary: #efedf8;
+  --secondary-foreground: #302b4b;
+  --muted: #efedf8;
+  --muted-foreground: #77738d;
+  --accent: #e7e2ff;
+  --accent-foreground: #33296a;
+  --destructive: #c94350;
+  --border: #e2dfed;
+  --input: #d9d5e6;
+  --ring: #8b7cff;
+  --radius: 0.75rem;
+  --app-header: rgb(247 246 251 / 92%);
+  --discord-sidebar: #f0eef8;
+  --discord-main: #fbfaff;
+  --discord-active: #e7e2ff;
+  --discord-hover: #efedf8;
+  --discord-text: #302b4b;
+  --discord-muted: #77738d;
+  --discord-border: #e2dfed;
+  --discord-message: #f0eef8;
+  --brand-glow: rgb(109 92 232 / 12%);
+}
+
+.dark {
+  color-scheme: dark;
   --background: #0b0a10;
   --foreground: #f4f2fa;
   --card: #111019;
   --card-foreground: #f4f2fa;
-  --popover: #111019;
+  --popover: #191724;
   --popover-foreground: #f4f2fa;
   --primary: #8b7cff;
   --primary-foreground: #ffffff;
   --secondary: #1b1926;
   --secondary-foreground: #e9e6f3;
-  --muted: #1b1926;
+  --muted: #1a1823;
   --muted-foreground: #9995ad;
   --accent: #29233e;
   --accent-foreground: #eee9ff;
@@ -24,51 +57,17 @@
   --border: #292637;
   --input: #292637;
   --ring: #8b7cff;
-  --radius: 0.75rem;
-  --app-header: rgb(11 10 16 / 92%);
-  --discord-sidebar: #14121d;
-  --discord-main: #111019;
-  --discord-active: #2b2540;
-  --discord-hover: #211d30;
-  --discord-text: #f4f2fa;
-  --discord-muted: #9995ad;
-  --discord-border: #292637;
-  --discord-message: #14121d;
-  --brand-glow: rgb(139 124 255 / 14%);
-}
-
-.dark {
-  color-scheme: dark;
-  --background: #0b0a10;
-  --foreground: #f2eee8;
-  --card: #111019;
-  --card-foreground: #f2eee8;
-  --popover: #191724;
-  --popover-foreground: #f2eee8;
-  --primary: #c49a6c;
-  --primary-foreground: #17130f;
-  --secondary: #1b1926;
-  --secondary-foreground: #e9e6f3;
-  --muted: #1a1823;
-  --muted-foreground: #a49a8d;
-  --accent: #29233e;
-  --accent-foreground: #eee9ff;
-  --destructive: #ef6464;
-  --border: #292637;
-  --input: #292637;
-  --ring: #c49a6c;
   --app-header: rgb(11 10 16 / 92%);
   --discord-sidebar: #0e0d13;
   --discord-main: #111019;
   --discord-active: #2b2540;
   --discord-hover: #1b1926;
-  --discord-text: #eee8df;
+  --discord-text: #f4f2fa;
   --discord-muted: #9995ad;
-  --discord-border: #332e27;
+  --discord-border: #292637;
   --discord-message: #0e0d13;
   --brand-glow: rgb(139 124 255 / 16%);
 }
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
