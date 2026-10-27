@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
-  CircleHelp, Code2, Command, Copy, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
+  CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
   Volume2, X, Zap,
 } from "lucide-react";
