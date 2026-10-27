@@ -22,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Discord's issuer identifier is https://discord.com. Explicitly setting it
       // avoids Auth.js treating its default issuer metadata as the expected value.
       issuer: "https://discord.com",
-      authorization: { params: { scope: "identify email" } },
+      authorization: { params: { scope: "identify email guilds" } },
       // Use state validation for Discord OAuth; do not require a PKCE verifier cookie.
       checks: ["state"],
     }),
