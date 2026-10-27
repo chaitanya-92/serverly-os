@@ -5,68 +5,67 @@
 /* Serverly OS — Obsidian Luxe design tokens.
    Light is the default; .dark switches every semantic surface. */
 :root {
-  color-scheme: light;
-  --background: #f7f6fb;
-  --foreground: #1d1b27;
-  --card: #ffffff;
-  --card-foreground: #1d1b27;
-  --popover: #ffffff;
-  --popover-foreground: #1d1b27;
-  --primary: #6d5ce8;
-  --primary-foreground: #ffffff;
-  --secondary: #efedf8;
-  --secondary-foreground: #302b4b;
-  --muted: #efedf8;
-  --muted-foreground: #77738d;
-  --accent: #e7e2ff;
-  --accent-foreground: #33296a;
-  --destructive: #c94350;
-  --border: #e2dfed;
-  --input: #d9d5e6;
-  --ring: #8b7cff;
+  color-scheme: dark;
+  --background: #111110;
+  --foreground: #F3F0E8;
+  --card: #191916;
+  --card-foreground: #F3F0E8;
+  --popover: #1D1C18;
+  --popover-foreground: #F3F0E8;
+  --primary: #D9A441;
+  --primary-foreground: #19150D;
+  --secondary: #24231E;
+  --secondary-foreground: #E8E1D2;
+  --muted: #22211D;
+  --muted-foreground: #A49D8F;
+  --accent: #302A1D;
+  --accent-foreground: #F6D99A;
+  --destructive: #D95F52;
+  --border: #38352D;
+  --input: #3B372E;
+  --ring: #D9A441;
   --radius: 0.75rem;
-  --app-header: rgb(247 246 251 / 92%);
-  --discord-sidebar: #f0eef8;
-  --discord-main: #fbfaff;
-  --discord-active: #e7e2ff;
-  --discord-hover: #efedf8;
-  --discord-text: #302b4b;
-  --discord-muted: #77738d;
-  --discord-border: #e2dfed;
-  --discord-message: #f0eef8;
-  --brand-glow: rgb(109 92 232 / 12%);
+  --app-header: rgb(17 17 16 / 96%);
+  --discord-sidebar: #151512;
+  --discord-main: #191916;
+  --discord-active: #302A1D;
+  --discord-hover: #24231E;
+  --discord-text: #F3F0E8;
+  --discord-muted: #A49D8F;
+  --discord-border: #38352D;
+  --discord-message: #151512;
+  --brand-glow: transparent;
 }
-
 .dark {
   color-scheme: dark;
-  --background: #0b0a10;
-  --foreground: #f4f2fa;
-  --card: #111019;
-  --card-foreground: #f4f2fa;
-  --popover: #191724;
-  --popover-foreground: #f4f2fa;
-  --primary: #8b7cff;
-  --primary-foreground: #ffffff;
-  --secondary: #1b1926;
-  --secondary-foreground: #e9e6f3;
-  --muted: #1a1823;
-  --muted-foreground: #9995ad;
-  --accent: #29233e;
-  --accent-foreground: #eee9ff;
-  --destructive: #ef6464;
-  --border: #292637;
-  --input: #292637;
-  --ring: #8b7cff;
-  --app-header: rgb(11 10 16 / 92%);
-  --discord-sidebar: #0e0d13;
-  --discord-main: #111019;
-  --discord-active: #2b2540;
-  --discord-hover: #1b1926;
-  --discord-text: #f4f2fa;
-  --discord-muted: #9995ad;
-  --discord-border: #292637;
-  --discord-message: #0e0d13;
-  --brand-glow: rgb(139 124 255 / 16%);
+  --background: #111110;
+  --foreground: #F3F0E8;
+  --card: #191916;
+  --card-foreground: #F3F0E8;
+  --popover: #1D1C18;
+  --popover-foreground: #F3F0E8;
+  --primary: #D9A441;
+  --primary-foreground: #19150D;
+  --secondary: #24231E;
+  --secondary-foreground: #E8E1D2;
+  --muted: #22211D;
+  --muted-foreground: #A49D8F;
+  --accent: #302A1D;
+  --accent-foreground: #F6D99A;
+  --destructive: #D95F52;
+  --border: #38352D;
+  --input: #3B372E;
+  --ring: #D9A441;
+  --app-header: rgb(17 17 16 / 96%);
+  --discord-sidebar: #151512;
+  --discord-main: #191916;
+  --discord-active: #302A1D;
+  --discord-hover: #24231E;
+  --discord-text: #F3F0E8;
+  --discord-muted: #A49D8F;
+  --discord-border: #38352D;
+  --discord-message: #151512;
+  --brand-glow: transparent;
 }
 @theme inline {
   --color-background: var(--background);
@@ -103,21 +102,21 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color 180ms ease, color 180ms ease;
 }
-::selection { background: var(--brand-glow); }
+::selection { background: #D9A441; color: #19150D; }
 button, input { font: inherit; }
 button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], label[for], summary { cursor: pointer; }
 button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
 [id] { scroll-margin-top: 6rem; }
 
-.landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
 .landing-shell { isolation: isolate; }
-.landing-nav { box-shadow: 0 1px 0 rgb(255 255 255 / 1%); }
+.landing-nav { border-bottom: 1px solid var(--border); }
 html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+button, [role="button"], a[href], label[for] { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-.landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
