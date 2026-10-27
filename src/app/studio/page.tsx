@@ -303,19 +303,15 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
           </motion.div>}
           {workspaceTab === "designer" && <>
 
-          <div className="space-y-4">
-            <div><div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">{lastSavedAt ? `Auto-saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Saving changes locally…"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
-            <div className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto rounded-xl border border-border bg-card p-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" className="shrink-0" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" className="shrink-0" onClick={() => setModal("reset")}><ArrowDown className="size-3.5" /> Reset</Button><span className="mx-1 h-6 w-px shrink-0 bg-border" /><Button size="sm" className="shrink-0" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-2">
+            <input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} />
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button variant="outline" size="sm" className="h-9 gap-2 border-border bg-background px-3 text-xs" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button>
+              <Button variant="outline" size="sm" className="h-9 gap-2 border-border bg-background px-3 text-xs" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button>
+              <Button variant="ghost" size="sm" className="h-9 gap-2 px-3 text-xs text-muted-foreground hover:text-destructive" onClick={() => setModal("reset")}><ArrowDown className="size-3.5" /> Reset</Button>
+            </div>
+            <Button size="sm" className="h-9 gap-2 px-4 text-xs shadow-sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button>
           </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {[{ label: "Categories", value: categories.length.toString(), icon: LayoutGrid }, { label: "Channels", value: channelCount.toString(), icon: Hash }, { label: "Voice rooms", value: voiceCount.toString(), icon: AudioLines }].map((metric) => {
-              const Icon = metric.icon;
-              return <Card key={metric.label} className="border-border bg-card"><CardContent className="flex items-center gap-3 p-3.5 sm:p-4"><div className="hidden size-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground sm:flex"><Icon className="size-4" /></div><div><div className="text-xl font-semibold tracking-tight">{metric.value}</div><div className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">{metric.label}</div></div></CardContent></Card>;
-            })}
-          </div>
-
-          
 
           <Card className="overflow-hidden border-border/80">
             <div className="flex flex-col justify-between gap-3 border-b border-border bg-card/70 p-4 sm:flex-row sm:items-center sm:px-5">
