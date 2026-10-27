@@ -255,7 +255,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
       </header>
 
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 p-4 md:p-6 xl:grid-cols-[230px_minmax(0,1fr)_280px] xl:gap-5 xl:p-6 2xl:grid-cols-[250px_minmax(0,1fr)_292px] 2xl:gap-6 2xl:p-8">
-        <aside className="space-y-5 xl:sticky xl:top-[92px] xl:max-h-[calc(100vh-108px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
+        <aside className="space-y-5 xl:sticky xl:top-[84px] xl:max-h-[calc(100vh-100px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
           <nav className="space-y-1">
             <Button variant="ghost" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
