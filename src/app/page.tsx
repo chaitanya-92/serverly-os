@@ -6,7 +6,7 @@ import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
-  Volume2, X, Zap, Moon, Sun, Download, Save,
+  Volume2, X, Zap, Moon, Sun, Download, Save, Upload,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,6 +91,37 @@ function Designer() {
       setNotice("Draft saved on this device.");
     } catch {
       setNotice("Could not save locally. Check your browser storage settings.");
+    }
+  }
+
+  async function importBlueprint(file: File | undefined) {
+    if (!file) return;
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!parsed || typeof parsed !== "object") throw new Error("invalid");
+      const candidate = parsed as { serverName?: unknown; selectedPreset?: unknown; selectedChannel?: unknown; categories?: unknown };
+      if (typeof candidate.serverName !== "string" || !Array.isArray(candidate.categories)) throw new Error("invalid");
+      const validCategories = candidate.categories.every((category) => {
+        if (!category || typeof category !== "object") return false;
+        const item = category as { id?: unknown; name?: unknown; channels?: unknown };
+        if (typeof item.id !== "string" || typeof item.name !== "string" || !Array.isArray(item.channels)) return false;
+        return item.channels.every((channel) => {
+          if (!channel || typeof channel !== "object") return false;
+          const entry = channel as { id?: unknown; name?: unknown; type?: unknown; locked?: unknown };
+          return typeof entry.id === "string" && typeof entry.name === "string" && (entry.type === "text" || entry.type === "voice") && (entry.locked === undefined || typeof entry.locked === "boolean");
+        });
+      });
+      if (!validCategories) throw new Error("invalid");
+      const importedCategories = candidate.categories as Category[];
+      const presetId = typeof candidate.selectedPreset === "string" && presets.some((preset) => preset.id === candidate.selectedPreset) ? candidate.selectedPreset : "developer";
+      setServerName(candidate.serverName.slice(0, 100));
+      setSelectedPreset(presetId);
+      setCategories(importedCategories);
+      const allChannels = importedCategories.flatMap((category) => category.channels);
+      setSelectedChannel(typeof candidate.selectedChannel === "string" && allChannels.some((channel) => channel.id === candidate.selectedChannel) ? candidate.selectedChannel : (allChannels[0]?.id ?? ""));
+      setNotice("Blueprint imported. Save the draft to keep it on this device.");
+    } catch {
+      setNotice("That file is not a valid Serverly blueprint JSON.");
     }
   }
 
@@ -228,7 +259,7 @@ function Designer() {
         <section className="min-w-0 space-y-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div><div className="mb-2 flex items-center gap-2"><Badge variant="subtle"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary" /> DESIGN MODE</Badge><span className="text-xs text-muted-foreground">{lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Unsaved changes"}</span></div><h1 className="text-2xl font-semibold tracking-tight sm:text-[30px]">Design your server<span className="text-primary">.</span></h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Shape every channel, room, and category before your community goes live.</p></div>
-            <div className="flex flex-wrap items-center gap-2"><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
+            <div className="flex flex-wrap items-center gap-2"><input id="blueprint-import" type="file" accept=".json,application/json" className="hidden" onChange={(event) => { void importBlueprint(event.target.files?.[0]); event.target.value = ""; }} /><Button variant="outline" size="sm" onClick={() => document.getElementById("blueprint-import")?.click()}><Upload className="size-3.5" /> Import JSON</Button><Button variant="outline" size="sm" onClick={exportBlueprint}><Download className="size-3.5" /> Export JSON</Button><Button variant="outline" size="sm" onClick={() => { setCategories(starterCategories); setSelectedPreset("developer"); setServerName("Devspace"); setSelectedChannel("general"); setNotice("Blueprint reset to Developer Hub"); }}><ArrowDown className="size-3.5" /> Reset</Button><Button size="sm" onClick={() => setShowCreateMenu((show) => !show)}><Plus className="size-4" /> Add channel</Button></div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
