@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
-  Volume2, X, Zap,
+  Volume2, X, Zap, Moon, Sun,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,11 @@ export default function Home() {
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [notice, setNotice] = useState("");
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const activePreset = presets.find((preset) => preset.id === selectedPreset) ?? presets[0];
   const selected = useMemo(
@@ -127,15 +132,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-[#0b0c10]/95 px-5 backdrop-blur-xl lg:px-8">
+      <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-xl lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_28px_#8b7cff40]"><LayoutGrid className="size-5" /></div>
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_28px_var(--brand-glow)]"><LayoutGrid className="size-5" /></div>
           <div className="leading-tight"><div className="text-[15px] font-semibold tracking-tight">serverly <span className="text-primary">OS</span></div><div className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Community architect</div></div>
           <Separator orientation="vertical" className="mx-3 hidden h-7 md:block" />
           <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex"><span>Workspace</span><ChevronRight className="size-3.5" /><span className="text-foreground">Untitled server</span></div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="hidden text-muted-foreground sm:inline-flex" aria-label="Help"><CircleHelp /></Button>
+          <Button variant="outline" size="icon" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}><span className="sr-only">Toggle theme</span>{theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}</Button>
           <Button variant="outline" className="hidden sm:inline-flex" onClick={() => { setNotice("Blueprint saved locally for this preview"); }}><Check className="size-4" /> Save draft</Button>
           <Button onClick={() => setNotice("Discord integration is coming next — this preview does not publish yet.")}><Zap className="size-4" /> <span className="hidden sm:inline">Deploy server</span><span className="sm:hidden">Deploy</span></Button>
         </div>
@@ -155,7 +161,7 @@ export default function Home() {
             {presets.map((preset) => {
               const Icon = preset.icon;
               const isActive = selectedPreset === preset.id;
-              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] shadow-[0_0_0_1px_#8b7cff10]" : "border-transparent hover:border-border hover:bg-card"}`}>
+              return <Button variant="ghost" key={preset.id} onClick={() => choosePreset(preset.id)} className={`group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${isActive ? "border-primary/50 bg-primary/[0.08] shadow-[0_0_0_1px_var(--brand-glow)]" : "border-transparent hover:border-border hover:bg-card"}`}>
                 <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isActive ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground group-hover:text-foreground"}`}><Icon className="size-4" /></div>
                 <div className="min-w-0 flex-1"><div className={`text-sm font-medium ${isActive ? "text-foreground" : "text-secondary-foreground"}`}>{preset.name}</div><div className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{preset.description}</div></div>
                 {isActive && <Check className="mt-1 size-3.5 shrink-0 text-primary" />}
@@ -181,7 +187,7 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-3">
             {[{ label: "Categories", value: categories.length.toString(), icon: LayoutGrid }, { label: "Channels", value: channelCount.toString(), icon: Hash }, { label: "Voice rooms", value: voiceCount.toString(), icon: AudioLines }].map((metric) => {
               const Icon = metric.icon;
-              return <Card key={metric.label} className="border-border/80 bg-card/70"><CardContent className="flex items-center gap-3 p-3.5 sm:p-4"><div className="hidden size-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground sm:flex"><Icon className="size-4" /></div><div><div className="text-xl font-semibold tracking-tight">{metric.value}</div><div className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">{metric.label}</div></div></CardContent></Card>;
+              return <Card key={metric.label} className="border-border bg-card"><CardContent className="flex items-center gap-3 p-3.5 sm:p-4"><div className="hidden size-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground sm:flex"><Icon className="size-4" /></div><div><div className="text-xl font-semibold tracking-tight">{metric.value}</div><div className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">{metric.label}</div></div></CardContent></Card>;
             })}
           </div>
 
@@ -193,20 +199,20 @@ export default function Home() {
               <div className="flex items-center gap-2"><div className="relative"><Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a channel..." className="h-8 w-full pl-8 text-xs sm:w-44" /></div><Button variant="outline" size="icon" className="size-8" aria-label="More preview options" onClick={() => setNotice("Preview options: drag-and-drop ordering is coming next.")}><MoreHorizontal className="size-4" /></Button></div>
             </div>
             <div className="grid min-h-[540px] grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
-              <div className="border-b border-border bg-[#101117] p-3 md:border-b-0 md:border-r">
-                <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#5142c7] text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
+              <div className="border-b border-border bg-[var(--discord-sidebar)] p-3 md:border-b-0 md:border-r">
+                <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#8d6b45] text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
                 <Separator className="mb-3" />
                 <div className="space-y-4">
                   {categories.map((category) => {
                     const visibleChannels = category.channels.filter((channel) => channel.name.toLowerCase().includes(search.toLowerCase()));
                     if (search && visibleChannels.length === 0) return null;
                     return <div key={category.id}>
-                      <div className="group mb-1 flex items-center justify-between px-1.5 text-[10px] font-bold tracking-[0.13em] text-[#85889a]"><span className="flex items-center gap-1"><ChevronDown className="size-3" />{category.name}</span><Button variant="ghost" className="opacity-0 transition group-hover:opacity-100" onClick={() => { const newName = prompt("Rename category", category.name); if (newName?.trim()) setCategories((current) => current.map((item) => item.id === category.id ? { ...item, name: newName.trim().toUpperCase() } : item)); }} aria-label={`Rename ${category.name}`}><MoreHorizontal className="size-3.5" /></Button></div>
+                      <div className="group mb-1 flex items-center justify-between px-1.5 text-[10px] font-bold tracking-[0.13em] text-[var(--discord-muted)]"><span className="flex items-center gap-1"><ChevronDown className="size-3" />{category.name}</span><Button variant="ghost" className="opacity-0 transition group-hover:opacity-100" onClick={() => { const newName = prompt("Rename category", category.name); if (newName?.trim()) setCategories((current) => current.map((item) => item.id === category.id ? { ...item, name: newName.trim().toUpperCase() } : item)); }} aria-label={`Rename ${category.name}`}><MoreHorizontal className="size-3.5" /></Button></div>
                       <div className="space-y-0.5">
                         {visibleChannels.map((channel) => {
                           const active = selectedChannel === channel.id;
-                          return <Button variant="ghost" key={channel.id} onClick={() => setSelectedChannel(channel.id)} className={`group flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-left text-[13px] transition ${active ? "bg-[#2b2d3a] text-white" : "text-[#9295a6] hover:bg-[#1c1e27] hover:text-[#e5e6ec]"}`}>
-                            {channel.type === "text" ? <Hash className={`size-[17px] shrink-0 ${active ? "text-[#b8b2ff]" : "text-[#74788a]"}`} /> : <Volume2 className={`size-[16px] shrink-0 ${active ? "text-[#b8b2ff]" : "text-[#74788a]"}`} />}
+                          return <Button variant="ghost" key={channel.id} onClick={() => setSelectedChannel(channel.id)} className={`group flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-left text-[13px] transition ${active ? "bg-[var(--discord-active)] text-[var(--discord-text)]" : "text-[var(--discord-muted)] hover:bg-[var(--discord-hover)] hover:text-[var(--discord-text)]"}`}>
+                            {channel.type === "text" ? <Hash className={`size-[17px] shrink-0 ${active ? "text-primary" : "text-[var(--discord-muted)]"}`} /> : <Volume2 className={`size-[16px] shrink-0 ${active ? "text-[#b8b2ff]" : "text-[#74788a]"}`} />}
                             <span className="min-w-0 flex-1 truncate">{channel.name}</span>{channel.locked && <LockKeyhole className="size-3 shrink-0 text-[#74788a]" />}{active && <span className="size-1.5 rounded-full bg-primary" />}
                           </Button>;
                         })}
@@ -215,19 +221,19 @@ export default function Home() {
                   })}
                   <Button variant="ghost" onClick={() => { const name = prompt("New category name", "NEW CATEGORY"); if (name?.trim()) setCategories((current) => [...current, { id: `category-${Date.now()}`, name: name.trim().toUpperCase(), channels: [] }]); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
                 </div>
-                <div className="mt-6 rounded-lg border border-dashed border-border p-3"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
+                <div className="mt-6 rounded-lg border border-dashed border-border p-3"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-700 dark:text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
               </div>
-              <div className="flex min-w-0 flex-col bg-[#14151c]">
-                <div className="flex items-center gap-3 border-b border-border/80 px-4 py-3"><Hash className="size-4 text-[#8b7cff]" /><span className="text-sm font-semibold">{selected?.name ?? "Select a channel"}</span><Separator orientation="vertical" className="h-4" /><span className="truncate text-xs text-muted-foreground">{selected?.type === "voice" ? "Voice channel" : "Text channel"}</span><div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Notifications" onClick={() => setNotice("Channel notification settings will be available in a future iteration.")}><Bell className="size-4" /></Button><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Channel options" onClick={() => setNotice("Select a channel and edit its details in the inspector.")}><MoreHorizontal className="size-4" /></Button></div></div>
+              <div className="flex min-w-0 flex-col bg-[var(--discord-main)]">
+                <div className="flex items-center gap-3 border-b border-border/80 px-4 py-3"><Hash className="size-4 text-primary" /><span className="text-sm font-semibold">{selected?.name ?? "Select a channel"}</span><Separator orientation="vertical" className="h-4" /><span className="truncate text-xs text-muted-foreground">{selected?.type === "voice" ? "Voice channel" : "Text channel"}</span><div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Notifications" onClick={() => setNotice("Channel notification settings will be available in a future iteration.")}><Bell className="size-4" /></Button><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Channel options" onClick={() => setNotice("Select a channel and edit its details in the inspector.")}><MoreHorizontal className="size-4" /></Button></div></div>
                 <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/[0.09] text-primary shadow-[0_0_45px_#8b7cff12]">{selected?.type === "voice" ? <Volume2 className="size-7" /> : <Hash className="size-7" />}</div>
+                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/[0.09] text-primary shadow-[0_0_45px_var(--brand-glow)]">{selected?.type === "voice" ? <Volume2 className="size-7" /> : <Hash className="size-7" />}</div>
                   <Badge variant="outline" className="mb-3 border-border/80 text-muted-foreground">{selected?.type === "voice" ? "VOICE ROOM" : "TEXT CHANNEL"}</Badge>
                   <h2 className="text-xl font-semibold tracking-tight">{selected?.name ?? "Choose a channel"}</h2>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{selected?.type === "voice" ? "A place for members to talk, collaborate, or hang out together." : "This is where your community conversation will happen. Add a topic to tell members what belongs here."}</p>
-                  {selected?.locked && <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-3 py-1.5 text-xs text-amber-200"><LockKeyhole className="size-3.5" /> Restricted channel</div>}
+                  {selected?.locked && <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-3 py-1.5 text-xs text-amber-700 dark:text-amber-700 dark:text-amber-200"><LockKeyhole className="size-3.5" /> Restricted channel</div>}
                   <div className="mt-8 flex flex-wrap justify-center gap-2"><Button variant="outline" size="sm" onClick={() => { setActiveTab("structure"); document.getElementById("inspector")?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }}><Settings2 className="size-3.5" /> Edit settings</Button><Button variant="ghost" size="sm" onClick={() => setNotice("Preview is illustrative; Discord publishing is not connected yet.")}><MessageCircle className="size-3.5" /> Preview details</Button></div>
                 </div>
-                <div className="border-t border-border/80 p-3"><div className="flex items-center gap-2 rounded-lg border border-border/80 bg-[#0f1015] px-3 py-2.5 text-xs text-muted-foreground"><MessageCircle className="size-4" /><span>Messages will appear here once your server is live</span><span className="ml-auto text-[10px]">PREVIEW</span></div></div>
+                <div className="border-t border-border/80 p-3"><div className="flex items-center gap-2 rounded-lg border border-[var(--discord-border)] bg-[var(--discord-message)] px-3 py-2.5 text-xs text-muted-foreground"><MessageCircle className="size-4" /><span>Messages will appear here once your server is live</span><span className="ml-auto text-[10px]">PREVIEW</span></div></div>
               </div>
             </div>
           </Card>
@@ -254,9 +260,9 @@ export default function Home() {
                 <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-medium">Private channel</div><div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Limit visibility to selected roles.</div></div><Button variant="ghost" disabled={!selected} onClick={() => setCategories((current) => current.map((category) => ({ ...category, channels: category.channels.map((channel) => channel.id === selectedChannel ? { ...channel, locked: !channel.locked } : channel) })))} className={`relative mt-0.5 h-5 w-9 rounded-full transition disabled:opacity-40 ${selected?.locked ? "bg-primary" : "bg-secondary"}`} aria-label="Toggle private channel"><span className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${selected?.locked ? "left-[18px]" : "left-0.5"}`} /></Button></div>
                 <Button variant="destructive" className="w-full" disabled={!selected} onClick={removeSelected}><X className="size-4" /> Remove channel</Button>
               </> : <>
-                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-amber-400/10 text-amber-300"><Crown className="size-4" /></div><div><div className="text-sm font-medium">Owner</div><div className="text-[11px] text-muted-foreground">Full server access</div></div><Badge variant="outline" className="ml-auto">1</Badge></div></div>
+                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-amber-400/10 text-amber-700 dark:text-amber-300"><Crown className="size-4" /></div><div><div className="text-sm font-medium">Owner</div><div className="text-[11px] text-muted-foreground">Full server access</div></div><Badge variant="outline" className="ml-auto">1</Badge></div></div>
                 <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="size-4" /></div><div><div className="text-sm font-medium">Moderator</div><div className="text-[11px] text-muted-foreground">Manage community</div></div><Badge variant="outline" className="ml-auto">3</Badge></div></div>
-                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-emerald-400/10 text-emerald-300"><MessageCircle className="size-4" /></div><div><div className="text-sm font-medium">Member</div><div className="text-[11px] text-muted-foreground">Standard access</div></div><Badge variant="outline" className="ml-auto">∞</Badge></div></div>
+                <div className="rounded-lg border border-border bg-background p-3"><div className="flex items-center gap-2"><div className="flex size-8 items-center justify-center rounded-lg bg-emerald-400/10 text-emerald-700 dark:text-emerald-300"><MessageCircle className="size-4" /></div><div><div className="text-sm font-medium">Member</div><div className="text-[11px] text-muted-foreground">Standard access</div></div><Badge variant="outline" className="ml-auto">∞</Badge></div></div>
                 <Button variant="outline" className="w-full" onClick={() => setNotice("Role editor is planned next. These are illustrative roles only.")}><Plus className="size-4" /> Add role</Button>
               </>}
             </CardContent>
