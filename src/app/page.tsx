@@ -6,7 +6,7 @@ import {
   ArrowDown, ArrowLeft, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
-  Volume2, X, Zap, Moon, Sun, Download, Save, Upload,
+  Volume2, X, Zap, Download, Save, Upload,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
