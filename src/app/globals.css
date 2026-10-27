@@ -134,7 +134,17 @@ html { scroll-behavior: smooth; }
 }
 
 
-@keyframes serverly-toast-timeline {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+.serverly-timed-toast {
+  isolation: isolate;
+}
+
+.serverly-toast-border-timer {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  animation: serverly-toast-border-timeline 3s linear forwards;
+}
+
+@keyframes serverly-toast-border-timeline {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 100; }
 }
