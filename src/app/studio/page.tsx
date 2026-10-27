@@ -292,6 +292,19 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const channelCount = categories.reduce((count, category) => count + category.channels.length, 0);
   const voiceCount = categories.reduce((count, category) => count + category.channels.filter((channel) => channel.type === "voice").length, 0);
 
+  // Do not render the starter blueprint until local state has been restored. This prevents
+  // the default template flashing on refresh and avoids showing stale controls briefly.
+  if (!isRestored) {
+    return (
+      <main className="flex h-dvh items-center justify-center bg-background text-foreground">
+        <div role="status" aria-live="polite" className="flex items-center gap-3 border border-border bg-card px-4 py-3 shadow-lg">
+          <LoaderCircle className="size-4 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">Restoring your workspace…</span>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="h-dvh overflow-hidden bg-background text-foreground">
       <header className="relative z-30 flex h-[68px] shrink-0 items-center justify-between bg-background/95 px-5 backdrop-blur-xl lg:px-8">
