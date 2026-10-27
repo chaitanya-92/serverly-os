@@ -29,9 +29,11 @@ export default async function ServerSelectionPage() {
 
   let guilds: DiscordGuild[] = [];
   let needsReconnect = false;
-  if (!account?.accessToken || !account.scope?.split(" ").includes("guilds")) {
+  if (!account?.accessToken) {
     needsReconnect = true;
   } else {
+    // The saved scope can be stale for accounts created before guild selection existed.
+    // Ask Discord itself whether this token can read the guild list.
     try { guilds = await getGuilds(account.accessToken); } catch { needsReconnect = true; }
   }
 
@@ -56,7 +58,7 @@ export default async function ServerSelectionPage() {
           </div>
           <div className="border-b border-white/10 px-6 py-4 sm:px-8"><div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white/40"><Search size={16}/> Servers you can manage</div></div>
           <div className="p-5 sm:p-8">
-            {needsReconnect ? <div className="rounded-xl border border-white/10 bg-black/15 p-6"><ShieldCheck className="text-[#d9a441]" size={24}/><h2 className="mt-3 font-medium">Allow access to your server list</h2><p className="mt-2 text-sm leading-6 text-white/55">Discord sign-in needs the read-only server-list permission. Reconnect to grant it. This does not add a bot.</p><form action={async () => { "use server"; await signIn("discord", { redirectTo: "/servers", authorizationParams: { scope: "identify email guilds" } }); }}><button className="mt-4 rounded-lg bg-[#d9a441] px-4 py-2.5 text-sm font-semibold text-black">Continue with Discord</button></form></div> :
+            {needsReconnect ? <div className="rounded-xl border border-white/10 bg-black/15 p-6"><ShieldCheck className="text-[#d9a441]" size={24}/><h2 className="mt-3 font-medium">Allow access to your server list</h2><p className="mt-2 text-sm leading-6 text-white/55">Discord sign-in needs the read-only server-list permission. Reconnect to grant it. This does not add a bot.</p><form action={async () => { "use server"; await signIn("discord", { redirectTo: "/servers", authorizationParams: { scope: "identify email guilds", prompt: "consent" } }); }}><button className="mt-4 rounded-lg bg-[#d9a441] px-4 py-2.5 text-sm font-semibold text-black">Continue with Discord</button></form></div> :
             manageable.length === 0 ? <div className="rounded-xl border border-dashed border-white/15 p-8 text-center"><Server className="mx-auto text-white/35" size={30}/><h2 className="mt-3 font-medium">No manageable servers found</h2><p className="mt-2 text-sm text-white/50">You can still create a fresh blueprint and design your server in Studio.</p></div> :
             <div className="grid gap-3 sm:grid-cols-2">{manageable.map((guild) => <form key={guild.id} action="/api/projects" method="post" className="group rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-[#d9a441]/70 hover:bg-[#d9a441]/[0.06]"><input type="hidden" name="serverName" value={guild.name}/><input type="hidden" name="discordGuildId" value={guild.id}/><div className="flex items-center gap-3"><div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#d9a441]/15 font-semibold text-[#e8b84e]">{guild.icon ? <img alt="" src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=96`} className="size-full object-cover"/> : guild.name.slice(0,1).toUpperCase()}</div><div className="min-w-0 flex-1"><h3 className="truncate text-sm font-semibold">{guild.name}</h3><p className="mt-1 text-xs text-white/45">{guild.owner ? "Server owner" : "Manage Server permission"}</p></div><span className="flex size-7 items-center justify-center rounded-full border border-white/10 text-white/35 transition group-hover:border-[#d9a441] group-hover:bg-[#d9a441] group-hover:text-black"><Check size={15}/></span></div><button className="mt-4 w-full rounded-lg border border-white/10 px-3 py-2.5 text-sm font-medium transition group-hover:border-[#d9a441]/50 group-hover:text-[#e8b84e]">Select server <span aria-hidden="true">→</span></button></form>)}</div>}
             <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-white/30"><span className="h-px flex-1 bg-white/10"/>or start fresh<span className="h-px flex-1 bg-white/10"/></div>
