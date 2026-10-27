@@ -2,7 +2,7 @@
 
 **Your community. Your architecture.**
 
-Serverly OS is a visual workspace for planning Discord communities. The current build adds Discord-only authentication, a private-by-default project workspace, and a Neon/PostgreSQL persistence foundation.
+Serverly OS is a visual workspace for planning Discord communities. It uses Discord-only Auth.js sign-in and Neon/PostgreSQL for project persistence.
 
 ## Local setup
 
@@ -10,35 +10,34 @@ Requirements: Node.js 20+ and npm.
 
 1. Copy `.env.example` to `.env.local`.
 2. In Neon Console, open **Connect**, select your database and role, and copy the PostgreSQL connection string into `DATABASE_URL`.
-3. Create an OAuth application in the Discord Developer Portal. Set the local redirect URI to `http://localhost:3000/api/auth/callback/discord`, then copy its client ID and secret into `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET`.
-4. Generate a local Auth.js secret and set `AUTH_SECRET`.
-5. Install dependencies, generate the migration, apply it, and start Next.js:
+3. Create an OAuth application in the Discord Developer Portal. Add this redirect URI exactly: `http://localhost:3000/api/auth/callback/discord`. Copy its client ID and secret into `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET`.
+4. Generate a local Auth.js secret with `openssl rand -base64 32` and set `AUTH_SECRET`.
+5. Install dependencies, apply the checked-in initial migration, and start Next.js:
 
 ```bash
 npm install
-npx drizzle-kit generate
 npx drizzle-kit migrate
 npm run dev
 ```
 
-Open [http://localhost:3000/login](http://localhost:3000/login) to sign in, then open the projects dashboard.
+Open [http://localhost:3000](http://localhost:3000). The root route sends signed-out users to Discord sign-in and signed-in users to their projects dashboard.
 
 ## Important: use a PostgreSQL connection string
 
-The URL ending in `/rest/v1` is a REST endpoint, not the standard Neon PostgreSQL connection string Drizzle needs. In Neon Console, use **Connect** to copy a URL shaped like:
+The URL ending in `/rest/v1` is a REST endpoint, not the PostgreSQL connection string Drizzle needs. In Neon Console, use **Connect** to copy a URL shaped like:
 
 ```text
 postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 ```
 
-Keep that URL in `.env.local` only. Do not commit it or paste the password into source files.
+Keep real credentials in `.env.local` only. Never commit `.env` or `.env.local`, and do not paste secrets into source files or chat. The repository's `.gitignore` excludes local environment files while retaining `.env.example`.
 
-## Current local implementation scope
+## Current implementation status
 
-- Discord-only Auth.js sign-in
+- Discord-only Auth.js sign-in configuration
 - Neon/PostgreSQL access through Drizzle ORM
-- Owner-scoped project records with a JSONB blueprint document
-- Version-history, read-only share-link, and deployment-operation schema foundations
-- Authenticated projects dashboard and starter blueprint creation
+- Initial schema migration for auth, projects, versions, share links, and deployment foundations
+- Owner-scoped project read/update/delete API
+- Session-aware root route and projects dashboard
 
-The existing Studio is still being migrated from local-only draft storage to project-backed persistence. Discord server import/publishing and share-link UI are not yet wired up.
+The full interactive editor's database autosave, complete version-history interface, share-link management UI, and Discord server import/publishing are still in progress. Do not treat those features as complete until they have been implemented and tested locally.
