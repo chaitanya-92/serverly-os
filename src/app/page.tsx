@@ -54,6 +54,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [categories, setCategories] = useState<Category[]>(starterCategories);
   const [selectedChannel, setSelectedChannel] = useState("general");
   const [serverName, setServerName] = useState("Devspace");
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
+  const [workspaceTab, setWorkspaceTab] = useState<"designer" | "ai" | "templates">("designer");
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [channelDraft, setChannelDraft] = useState({ name: "new-channel", type: "text" as ChannelType, categoryId: "welcome", isPrivate: false });
@@ -239,9 +241,9 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         <aside className="space-y-5 xl:sticky xl:top-[136px] xl:max-h-[calc(100vh-152px)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workspace</div><Button variant="ghost" size="icon" className="size-7 text-muted-foreground" aria-label="Workspace settings"><Settings2 className="size-4" /></Button></div>
           <nav className="space-y-1">
-            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg bg-accent px-3 py-2.5 text-left text-sm font-medium text-accent-foreground"><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
-            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"><Sparkles className="size-4" /> AI architect</Button>
-            <Button variant="ghost" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"><LayoutGrid className="size-4" /> Template library</Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("designer"); setActiveTab("structure"); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${workspaceTab === "designer" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4 text-primary" /> Server designer <Badge variant="subtle" className="ml-auto">MVP</Badge></Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("ai"); setNotice("AI Architect preview: choose a template first, then refine the generated blueprint. Prompt-based generation is coming next."); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "ai" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><Sparkles className="size-4" /> AI architect</Button>
+            <Button variant="ghost" onClick={() => { setWorkspaceTab("templates"); setNotice("Template library selected. Choose a template below to load its structure into the editor."); }} className={`flex w-full justify-start items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm ${workspaceTab === "templates" ? "bg-accent text-accent-foreground" : "text-muted-foreground transition hover:bg-secondary hover:text-foreground"}`}><LayoutGrid className="size-4" /> Template library</Button>
           </nav>
           <Separator />
           <div className="flex items-center justify-between"><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Templates</div><span className="text-xs text-muted-foreground">04</span></div>
