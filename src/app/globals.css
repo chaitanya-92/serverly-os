@@ -105,11 +105,15 @@ body {
 }
 ::selection { background: var(--brand-glow); }
 button, input { font: inherit; }
+button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], label[for], summary { cursor: pointer; }
+button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+[id] { scroll-margin-top: 6rem; }
 
 .landing-glow { background: radial-gradient(circle, rgb(139 124 255 / 17%) 0%, rgb(139 124 255 / 5%) 40%, transparent 72%); }
 .landing-shell { isolation: isolate; }
 .landing-nav { box-shadow: 0 1px 0 rgb(255 255 255 / 1%); }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
