@@ -8,7 +8,7 @@ const starterBlueprint: BlueprintDocument = {
   serverName: "My Community",
   selectedPreset: "developer",
   selectedChannel: "general",
-  visibility: "public",
+  visibility: "private",
   categories: [
     { id: "welcome", name: "START HERE", channels: [
       { id: "start", name: "start-here", type: "text" },
