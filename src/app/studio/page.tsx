@@ -373,7 +373,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </div>
             </div>
           </Card>
-          {notice && <div role="status" className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-muted-foreground"><Check className="size-3.5 text-primary" /><span>{notice}</span><Button variant="ghost" size="icon" className="ml-auto size-6" onClick={() => setNotice("")} aria-label="Dismiss message"><X className="size-3.5" /></Button></div>}
+          {notice && <div role="status" aria-live="polite" className="fixed bottom-5 right-5 z-[120] flex w-[min(380px,calc(100vw-2rem))] items-start gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-xl"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary"><Check className="size-3.5" /></span><span className="min-w-0 flex-1 leading-relaxed">{notice}</span><Button variant="ghost" size="icon" className="-mr-1 -mt-1 size-7 shrink-0 text-muted-foreground" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-3.5" /></Button></div>}
           </>}
 
         </section>
