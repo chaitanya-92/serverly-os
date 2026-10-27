@@ -28,16 +28,27 @@ const starterBlueprint: BlueprintDocument = {
   ],
 };
 
-export async function POST() {
+export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.redirect(new URL("/login", process.env.NEXTAUTH_URL ?? "http://localhost:3000"), 303);
+
+  const form = await request.formData().catch(() => null);
+  const requestedName = String(form?.get("serverName") ?? "").trim().slice(0, 100);
+  const projectName = requestedName || "Untitled community";
+  const blueprint: BlueprintDocument = {
+    ...starterBlueprint,
+    serverName: requestedName || starterBlueprint.serverName,
+    selectedPreset: requestedName ? "developer" : starterBlueprint.selectedPreset,
+  };
 
   const db = requireDb();
   const [project] = await db.insert(projects).values({
     ownerId: session.user.id,
-    name: "Untitled community",
-    description: "A new Discord server blueprint",
-    document: starterBlueprint,
+    name: projectName,
+    description: requestedName
+      ? "Blueprint for a selected Discord server. Existing channels are not imported yet."
+      : "A new Discord server blueprint",
+    document: blueprint,
   }).returning({ id: projects.id });
 
   return NextResponse.redirect(new URL(`/studio/${project.id}`, process.env.NEXTAUTH_URL ?? "http://localhost:3000"), 303);
