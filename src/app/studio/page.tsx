@@ -306,7 +306,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
         </aside>
 
-        <section className="min-w-0 space-y-3 xl:flex xl:h-[calc(100vh-112px)] xl:min-h-0 xl:flex-col xl:overflow-hidden">
+        <section className="min-w-0 space-y-3 xl:flex xl:h-[calc(100dvh-112px)] xl:min-h-0 xl:flex-col xl:overflow-hidden">
 
           {workspaceTab === "ai" && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
             <div><Badge variant="subtle">BLUEPRINT ARCHITECT</Badge><h1 className="mt-3 text-3xl font-semibold">Describe your community<span className="text-primary">.</span></h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Create an editable starter structure from your community brief.</p></div>
@@ -329,17 +329,17 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             <Button size="sm" className="h-9 gap-2 px-4 text-xs shadow-sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button>
           </div>
 
-          <Card className="relative overflow-hidden border-border/80">
+          <Card className="relative flex min-h-0 flex-1 flex-col overflow-hidden border-border/80">
             {isApplyingTemplate && <div aria-live="polite" aria-label="Applying template" className="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-[2px]"><div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xl"><LoaderCircle className="size-4 animate-spin text-primary" /><span className="text-sm font-medium">Preparing your workspace…</span></div></div>}
             <div className="flex flex-col justify-between gap-3 border-b border-border bg-card/70 p-3 sm:flex-row sm:items-center sm:px-4">
               <div><div className="flex items-center gap-2 text-sm font-semibold"><span className="size-2 rounded-full bg-emerald-400" /> Live preview</div><div className="mt-1 text-xs text-muted-foreground">A preview of your Discord server structure</div></div>
               <div className="flex flex-wrap items-center gap-1.5"><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><LayoutGrid className="size-3" />{categories.length} categories</span><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><Hash className="size-3" />{channelCount} channels</span><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><AudioLines className="size-3" />{voiceCount} voice</span><div className="relative"><Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a channel..." className="h-8 w-full pl-8 text-xs sm:w-44" /></div><Button variant="outline" size="icon" className="size-8" aria-label="More preview options" onClick={() => setNotice("Preview options: drag-and-drop ordering is coming next.")}><MoreHorizontal className="size-4" /></Button></div>
             </div>
             <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden md:grid-cols-[176px_minmax(0,1fr)]">
-              <div className="border-b border-border bg-[var(--discord-sidebar)] p-3 md:border-b-0 md:border-r">
+              <div className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-[var(--discord-sidebar)] p-3 md:border-b-0 md:border-r">
                 <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
                 <Separator className="mb-3" />
-                <div className="space-y-4">
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain">
                   {categories.map((category) => {
                     const visibleChannels = category.channels.filter((channel) => channel.name.toLowerCase().includes(search.toLowerCase()));
                     if (search && visibleChannels.length === 0) return null;
@@ -358,7 +358,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                   })}
                   <Button variant="ghost" onClick={() => { setCategoryDraft({ name: "NEW CATEGORY", categoryId: "" }); setModal("category"); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
                 </div>
-                <div className="mt-4 rounded-lg border border-dashed border-border p-2.5"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-700 dark:text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
+                <div className="mt-3 shrink-0 rounded-lg border border-dashed border-border p-2.5"><div className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="size-3.5 text-emerald-700 dark:text-emerald-400" /> Structure looks good</div><p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Your blueprint is ready for permission checks before deployment.</p></div>
               </div>
               <div className="flex min-w-0 flex-col bg-[var(--discord-main)]">
                 <div className="flex items-center gap-2.5 border-b border-border/80 px-3 py-2.5"><Hash className="size-4 text-primary" /><span className="text-sm font-semibold">{selected?.name ?? "Select a channel"}</span><Separator orientation="vertical" className="h-4" /><span className="truncate text-xs text-muted-foreground">{selected?.type === "voice" ? "Voice channel" : "Text channel"}</span><div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Notifications" onClick={() => setNotice("Channel notification settings will be available in a future iteration.")}><Bell className="size-4" /></Button><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Channel options" onClick={() => setNotice("Select a channel and edit its details in the inspector.")}><MoreHorizontal className="size-4" /></Button></div></div>
@@ -379,7 +379,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
         </section>
 
-        <aside id="inspector" className="space-y-2 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-92px)] xl:min-h-0 xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
+        <aside id="inspector" className="space-y-2 xl:sticky xl:top-0 xl:max-h-[calc(100dvh-140px)] xl:min-h-0 xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
           <div><div className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Inspector</div><h2 className="mt-1 text-base font-semibold tracking-tight">Configure blueprint</h2><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Server identity and channel settings.</p></div>
           <Card>
             <CardContent className="space-y-2.5 p-3">
