@@ -286,7 +286,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 
       <div className={`mx-auto grid h-[calc(100dvh-68px)] min-h-0 max-w-[1800px] grid-cols-1 gap-4 overflow-hidden p-3 lg:p-4 ${sidebarCollapsed ? "xl:grid-cols-[64px_minmax(0,1fr)_252px]" : "xl:grid-cols-[208px_minmax(0,1fr)_252px]"} 2xl:gap-5 2xl:p-5`}>
         <div className="relative min-w-0">
-          <Button variant="outline" size="icon" className="absolute -right-3 top-0 z-40 hidden size-7 rounded-sm border border-border bg-card text-muted-foreground shadow-md transition-all duration-200 hover:border-primary hover:bg-accent hover:text-primary xl:inline-flex" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => { setSidebarHint(null); setSidebarCollapsed((value) => !value); }}><PanelLeft className={`size-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`} /></Button>
+          <Button variant="outline" size="icon" className="absolute -right-3 top-0 z-40 hidden size-7 rounded-sm border border-transparent bg-transparent text-muted-foreground shadow-none transition-colors duration-200 hover:border-transparent hover:bg-transparent hover:text-primary xl:inline-flex" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => { setSidebarHint(null); setSidebarCollapsed((value) => !value); }}><PanelLeft className={`size-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`} /></Button>
         <aside className={`flex min-w-0 flex-col gap-4 xl:sticky xl:top-0 xl:h-full xl:min-h-0 xl:self-start ${sidebarCollapsed ? "overflow-visible" : "overflow-y-auto overscroll-contain"} xl:pr-1`}>
           <div className={`flex min-h-7 items-center ${sidebarCollapsed ? "justify-center" : "justify-between pr-3"}`}><div className={`text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</div></div>
           <nav className="space-y-1">
@@ -309,7 +309,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
         </aside>
         </div>
 
-        {sidebarHint && sidebarCollapsed && <AnimatePresence><motion.div key={sidebarHint} initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} role="status" className="fixed right-4 top-[76px] z-[120] flex max-w-[min(320px,calc(100vw-2rem))] items-center gap-3 border border-border bg-card px-3 py-2.5 text-sm text-foreground shadow-xl"><span className="size-1.5 shrink-0 bg-primary" /><span className="font-medium">{sidebarHint}</span><span className="text-xs text-muted-foreground">Navigation</span><button type="button" aria-label="Dismiss tooltip" onClick={() => setSidebarHint(null)} className="ml-1 flex size-6 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"><X className="size-3.5" /></button></motion.div></AnimatePresence>}
+        {sidebarHint && sidebarCollapsed && <AnimatePresence><motion.div key={sidebarHint} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} role="status" className="pointer-events-none fixed right-4 top-4 z-[120] border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-lg">{sidebarHint}</motion.div></AnimatePresence>}
 
         <section className="min-w-0 space-y-3 xl:flex xl:h-full xl:min-h-0 xl:flex-col xl:overflow-hidden">
 
