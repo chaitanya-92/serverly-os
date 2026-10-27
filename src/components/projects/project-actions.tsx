@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 
@@ -11,7 +12,7 @@ export function ProjectActions({ projectId, initialName }: { projectId: string; 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function renameProject(event: React.FormEvent<HTMLFormElement>) {
+  async function renameProject(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = name.trim();
     if (!trimmed || trimmed.length > 100) {
