@@ -304,8 +304,6 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
                </Button></motion.div>;
              })}
            </motion.div>
-                    </div>;
-                  })}
                   <Button variant="ghost" onClick={() => { setCategoryDraft({ name: "NEW CATEGORY", categoryId: "" }); setModal("category"); }} className="flex items-center gap-2 px-1.5 pt-1 text-xs text-muted-foreground transition hover:text-foreground"><Plus className="size-3.5" /> Add category</Button>
                 </div>
               </div>
