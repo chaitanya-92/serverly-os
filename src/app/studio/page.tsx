@@ -399,7 +399,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </div>
             </div>
           </Card>
-          {notice && <div key={notice} role="status" aria-live="polite" className="serverly-timed-toast fixed right-4 top-20 z-[120] w-[min(380px,calc(100vw-2rem))] overflow-hidden border border-border bg-card px-4 py-3 text-sm text-foreground shadow-[0_16px_48px_rgba(0,0,0,0.45)]"><div className="pr-1 leading-relaxed">{notice}</div><svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none"><rect className="serverly-toast-border-timer" x="0.75" y="0.75" width="98.5" height="98.5" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" /></svg></div>}
+          {notice && <div key={notice} role="status" aria-live="polite" className="serverly-timed-toast pointer-events-none fixed right-4 top-[5.25rem] z-[60] w-[min(290px,calc(100vw-2rem))] overflow-hidden border border-border/70 bg-card/95 px-3 py-2 text-xs text-muted-foreground shadow-[0_4px_16px_rgba(0,0,0,0.16)] backdrop-blur-sm"><div className="pr-1 leading-relaxed">{notice}</div><svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none"><rect className="serverly-toast-border-timer" x="0.75" y="0.75" width="98.5" height="98.5" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" /></svg></div>}
           </>}
 
         </section>
