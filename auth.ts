@@ -23,6 +23,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // avoids Auth.js treating its default issuer metadata as the expected value.
       issuer: "https://discord.com",
       authorization: { params: { scope: "identify email" } },
+      // Use state validation for Discord OAuth; do not require a PKCE verifier cookie.
+      checks: ["state"],
     }),
   ],
   session: { strategy: adapter ? "database" : "jwt" },
