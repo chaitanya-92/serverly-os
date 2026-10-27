@@ -20,11 +20,11 @@
   --muted-foreground: #A49D8F;
   --accent: #302A1D;
   --accent-foreground: #F6D99A;
-  --destructive: #D95F52;
+  --destructive: #B84A43;
   --border: #38352D;
   --input: #3B372E;
   --ring: #D9A441;
-  --radius: 0.75rem;
+  --radius: 0.25rem;
   --app-header: rgb(17 17 16 / 96%);
   --discord-sidebar: #151512;
   --discord-main: #191916;
