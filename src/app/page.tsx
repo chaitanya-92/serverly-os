@@ -290,7 +290,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             </div>
             <div className="grid min-h-[540px] grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
               <div className="border-b border-border bg-[var(--discord-sidebar)] p-3 md:border-b-0 md:border-r">
-                <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#8d6b45] text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
+                <div className="mb-3 flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white">{serverName.slice(0, 1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{serverName || "Your server"}</div><div className="mt-0.5 text-[10px] text-muted-foreground">Server preview</div></div><ChevronDown className="size-4 text-muted-foreground" /></div>
                 <Separator className="mb-3" />
                 <div className="space-y-4">
                   {categories.map((category) => {
@@ -385,7 +385,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
 }
 
 function ProductMark({ size = "size-10" }: { size?: string }) {
-  return <div className={`flex ${size} items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_36px_var(--brand-glow)]`}><LayoutGrid className="size-5" /></div>;
+  return <div className={`flex ${size} items-center justify-center rounded-xl bg-primary text-primary-foreground `}><LayoutGrid className="size-5" /></div>;
 }
 
 function LandingPage({ onStart }: { onStart: (presetId?: string) => void }) {
