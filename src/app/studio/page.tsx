@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight,
+  ArrowDown, ArrowRight, AudioLines, Bell, Check, ChevronDown, ChevronRight, LoaderCircle,
   CircleHelp, Code2, Command, Crown, Gamepad2, Hash, LayoutGrid, LockKeyhole,
   MessageCircle, MoreHorizontal, Plus, Search, Settings2, ShieldCheck, Sparkles, WandSparkles,
   Volume2, X, Zap, Download, Save, Upload,
@@ -72,6 +72,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   const [activeTab, setActiveTab] = useState<"structure" | "roles">("structure");
   const [isRestored, setIsRestored] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
 
   useEffect(() => {
     try {
@@ -174,6 +175,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
   );
 
   function choosePreset(id: string) {
+    setIsApplyingTemplate(true);
     setSelectedPreset(id);
     const preset = presets.find((item) => item.id === id);
     if (preset) setServerName(preset.name);
@@ -202,7 +204,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
     const nextSelection = "general";
     setSelectedChannel(nextSelection);
     setWorkspaceTab("designer");
-    setNotice(preset ? `${preset.name} template loaded` : "Template loaded");
+    setNotice("");
+    window.setTimeout(() => setIsApplyingTemplate(false), 260);
   }
 
   useEffect(() => {
@@ -313,7 +316,8 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
             <Button size="sm" className="h-9 gap-2 px-4 text-xs shadow-sm" onClick={() => { setChannelDraft({ name: "new-channel", type: "text", categoryId: categories[0]?.id ?? "", isPrivate: false }); setModal("channel"); }}><Plus className="size-4" /> Add channel</Button>
           </div>
 
-          <Card className="overflow-hidden border-border/80">
+          <Card className="relative overflow-hidden border-border/80">
+            {isApplyingTemplate && <div aria-live="polite" aria-label="Applying template" className="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-[2px]"><div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xl"><LoaderCircle className="size-4 animate-spin text-primary" /><span className="text-sm font-medium">Preparing your workspace…</span></div></div>}
             <div className="flex flex-col justify-between gap-3 border-b border-border bg-card/70 p-3 sm:flex-row sm:items-center sm:px-4">
               <div><div className="flex items-center gap-2 text-sm font-semibold"><span className="size-2 rounded-full bg-emerald-400" /> Live preview</div><div className="mt-1 text-xs text-muted-foreground">A preview of your Discord server structure</div></div>
               <div className="flex flex-wrap items-center gap-1.5"><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><LayoutGrid className="size-3" />{categories.length} categories</span><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><Hash className="size-3" />{channelCount} channels</span><span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 text-[10px] text-muted-foreground"><AudioLines className="size-3" />{voiceCount} voice</span><div className="relative"><Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a channel..." className="h-8 w-full pl-8 text-xs sm:w-44" /></div><Button variant="outline" size="icon" className="size-8" aria-label="More preview options" onClick={() => setNotice("Preview options: drag-and-drop ordering is coming next.")}><MoreHorizontal className="size-4" /></Button></div>
@@ -357,7 +361,7 @@ function Designer({ initialPreset = "developer" }: { initialPreset?: string }) {
               </div>
             </div>
           </Card>
-          {notice && <div role="status" className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.07] px-4 py-3 text-sm text-primary"><span className="flex items-center gap-2"><Check className="size-4 shrink-0" />{notice}</span><Button variant="ghost" onClick={() => setNotice("")} aria-label="Dismiss notification"><X className="size-4" /></Button></div>}
+          {notice && <div role="status" className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-muted-foreground"><Check className="size-3.5 text-primary" /><span>{notice}</span><Button variant="ghost" size="icon" className="ml-auto size-6" onClick={() => setNotice("")} aria-label="Dismiss message"><X className="size-3.5" /></Button></div>}
           </>}
 
         </section>
