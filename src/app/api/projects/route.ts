@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/../auth";
+import { and, eq } from "drizzle-orm";
 import { requireDb } from "@/db";
-import { projects, type BlueprintDocument } from "@/db/schema";
+import { accounts, projects, type BlueprintDocument } from "@/db/schema";
 
 const starterBlueprint: BlueprintDocument = {
   schemaVersion: 1,
@@ -34,6 +35,33 @@ export async function POST(request: Request) {
 
   const form = await request.formData().catch(() => null);
   const requestedName = String(form?.get("serverName") ?? "").trim().slice(0, 100);
+  const requestedGuildId = String(form?.get("discordGuildId") ?? "").trim();
+  let discordGuildId: string | null = null;
+
+  if (requestedGuildId) {
+    if (!/^\\d{17,20}$/.test(requestedGuildId)) {
+      return NextResponse.json({ error: "Invalid Discord server ID" }, { status: 400 });
+    }
+    const db = requireDb();
+    const [account] = await db.select({ accessToken: accounts.access_token, scope: accounts.scope })
+      .from(accounts)
+      .where(and(eq(accounts.userId, session.user.id), eq(accounts.provider, "discord")))
+      .limit(1);
+    if (!account?.accessToken || !account.scope?.split(" ").includes("guilds")) {
+      return NextResponse.json({ error: "Reconnect Discord and grant server-list access first." }, { status: 403 });
+    }
+    const response = await fetch("https://discord.com/api/users/@me/guilds?limit=200", {
+      headers: { Authorization: `Bearer ${account.accessToken}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return NextResponse.json({ error: "Discord server list expired. Reconnect Discord and try again." }, { status: 401 });
+    const guilds = await response.json() as Array<{ id: string; owner: boolean; permissions: string }>;
+    const selectedGuild = guilds.find((guild) => guild.id === requestedGuildId);
+    if (!selectedGuild || (!selectedGuild.owner && (Number(selectedGuild.permissions) & 0x20) !== 0x20)) {
+      return NextResponse.json({ error: "You do not have Manage Server permission for that Discord server." }, { status: 403 });
+    }
+    discordGuildId = selectedGuild.id;
+  }
   const projectName = requestedName || "Untitled community";
   const blueprint: BlueprintDocument = {
     ...starterBlueprint,
@@ -48,6 +76,7 @@ export async function POST(request: Request) {
     description: requestedName
       ? "Blueprint for a selected Discord server. Existing channels are not imported yet."
       : "A new Discord server blueprint",
+    discordGuildId,
     document: blueprint,
   }).returning({ id: projects.id });
 
